@@ -1,0 +1,10 @@
+{
+    "module": "mlcbase",
+    "github-repository": "https://github.com/wmchen/mlcbase",
+    "gitee-repository": "https://gitee.com/wm-chen/mlcbase",
+    "programmer": "Weiming Chen",
+    "tester": [
+        "Weiming Chen",
+        "Yuanshuang Sun"
+    ]
+}

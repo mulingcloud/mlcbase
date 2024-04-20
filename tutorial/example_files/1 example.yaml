@@ -1,0 +1,33 @@
+name: Weiming Chen
+gender: male
+title: Originator & Leader
+MID: MLC0001
+email: chenwm2023@mail.sustech.edu.cn
+homepage: https://weimingchen.net
+orcid: https://orcid.org/0000-0002-0586-1278
+google-scolar: https://scholar.google.com/citations?user=F4FJV2UAAAAJ&h
+education:
+  Bachlor:
+    school: Xidian University
+    major: Mechanical Design Manufacture and Automation
+    duration: 2015-2019
+  Master:
+    school: Xidian University
+    major: Electronic Science and Technology
+    duration: 2020-2023
+  PhD:
+    school: Southern University of Science and Technology
+    major: Intelligent Manufacturing and Robotics
+    duration: 2023-present
+research-interests:
+  - Machine Learning
+  - Computer Vision
+  - Multi Modality
+  - AIGC
+  - Text-to-Image Synthesis
+  - Object Detection
+  - Remote Sensing
+hobbies:
+  - Playing badminton
+  - Coding
+  - Listening ancient style songs

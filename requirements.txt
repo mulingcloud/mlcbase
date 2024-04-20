@@ -1,0 +1,11 @@
+colorama
+loguru
+pytz
+prettytable
+pyyaml
+xmltodict
+rsa
+pycryptodome
+paramiko
+PyMySQL
+hvac
