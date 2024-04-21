@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/wmchen/mlcbase/tree/main/images/logo_horizontal.png" width="100%" />
+    <img src="./images/logo_horizontal.png" width="100%" />
 </div>
 
 <div align="center">
