@@ -1,12 +1,12 @@
 <div align="center">
-    <img src="https://lychee.weimingchen.net:1130/uploads/original/dc/0e/eae6786c5d68d4a564f8e3f60157.png" width="100%" />
+    <img src="https://github.com/wmchen/mlcbase/tree/main/images/logo_horizontal.png" width="100%" />
 </div>
 
 <div align="center">
-    <a href="https://pypi.org/project/mlcbase">
+    <a href="https://pypi.org/project/mlcbase/">
         <img src="https://img.shields.io/pypi/v/mlcbase" />
     </a>
-    <a href="./LICENSE">
+    <a href="https://github.com/wmchen/mlcbase/blob/main/LICENSE">
         <img src="https://img.shields.io/github/license/wmchen/mlcbase.svg" />
     </a>
     <a href="https://weimingchen.net">
@@ -79,11 +79,11 @@ pip install mlcbase
 
 ## Getting Started
 
-Please refer to [tutorial.ipynb](./tutorial.ipynb) for more intuitive instructions.
+Please refer to [tutorial.ipynb](https://github.com/wmchen/mlcbase/blob/main/tutorial.ipynb) for more intuitive instructions.
 
 ## Changelogs
 
-See all changes in [CHANGELOG](./CHANGELOG.md).
+See all changes in [CHANGELOG](https://github.com/wmchen/mlcbase/blob/main/CHANGELOG.md).
 
 ## Contributors
 
@@ -91,4 +91,4 @@ We appreciate all the contributors who add new features or fix bugs, as well as 
 
 ## License
 
-This project is released under the [Apache 2.0 license](./LICENSE).
+This project is released under the [Apache 2.0 license](https://github.com/wmchen/mlcbase/blob/main/LICENSE).

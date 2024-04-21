@@ -1,10 +1,8 @@
 .vscode/
 **/__pycache__/
 backup/
-vault_config/
-test/
 release/
-mulingcloud*
 release.*
 test.*
 .pypirc
+TODO.md
