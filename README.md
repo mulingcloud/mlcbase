@@ -45,11 +45,11 @@ Supported platforms:
 
     We offer various features to make file operations easier.
 
-- <span style="color: red;font-weight: bold;font-style: italic">(new)</span> **Image IO**
+- $\color{red}{\textbf{new }}$ **Image IO**
 
     We offer a simple way to load and save images.
 
-- $\color{red}{\textbf{\textit{(new)}}}$ **One-Time Password**
+- $\color{red}{\textbf{new }}$ **One-Time Password**
 
     We support two methods for OTP: Time-based One-Time Password (TOTP) and HMAC-based One-Time Password (HOTP).
 
