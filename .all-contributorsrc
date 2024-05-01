@@ -22,6 +22,16 @@
         "test",
         "tutorial"
       ]
+    },
+    {
+      "login": "dcsasori",
+      "name": "dcsasori",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32105419?v=4",
+      "profile": "https://github.com/dcsasori",
+      "contributions": [
+        "ideas",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,

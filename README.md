@@ -102,6 +102,7 @@ We welcome all contributors, feel free to create an issue or file a pull request
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://weimingchen.net/"><img src="https://avatars.githubusercontent.com/u/33000375?v=4?s=100" width="100px;" alt="Weiming Chen"/><br /><sub><b>Weiming Chen</b></sub></a><br /><a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Code">💻</a> <a href="#ideas-wmchen" title="Ideas, Planning, & Feedback">🤔</a> <a href="#projectManagement-wmchen" title="Project Management">📆</a> <a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Tests">⚠️</a> <a href="#tutorial-wmchen" title="Tutorials">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dcsasori"><img src="https://avatars.githubusercontent.com/u/32105419?v=4?s=100" width="100px;" alt="dcsasori"/><br /><sub><b>dcsasori</b></sub></a><br /><a href="#ideas-dcsasori" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/wmchen/mlcbase/commits?author=dcsasori" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
   <tfoot>
