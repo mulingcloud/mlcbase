@@ -6,7 +6,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/mlcbase)](https://pypi.org/project/mlcbase/)
 [![License](https://img.shields.io/github/license/wmchen/mlcbase.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-[![All Contributors](https://img.shields.io/github/all-contributors/wmchen/mlcbase?color=blue)](./README.md/#contributors)
+[![All Contributors](https://img.shields.io/github/all-contributors/wmchen/mlcbase?color=blue)](#contributors)
 
 </div>
 
@@ -49,7 +49,7 @@ Supported platforms:
 
     We offer a simple way to load and save images.
 
-- <span style="color: red;font-weight: bold;font-style: italic">(new)</span> **One-Time Password**
+- $\color{red}{\textbf{\textit{(new)}}}$ **One-Time Password**
 
     We support two methods for OTP: Time-based One-Time Password (TOTP) and HMAC-based One-Time Password (HOTP).
 
