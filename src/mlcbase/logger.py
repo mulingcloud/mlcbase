@@ -15,9 +15,7 @@
 """
 MuLingCloud base module: logger
 
-Repository: 
-- Github: https://github.com/wmchen/pylog
-- Gitee: https://gitee.com/wm-chen/pylog
+Repository: https://github.com/wmchen/pylog or https://gitee.com/wm-chen/pylog
 
 Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
@@ -135,8 +133,55 @@ class Logger:
         return datetime.now(tz=pytz.timezone(timezone)).strftime(timeformat)
 
     def get_elapsed(self, elapsedformat):
+        def format_time(e, format):
+            total_seconds = int((e.total_seconds() * 10**6 - e.microseconds) / 10**6)
+            smallest_scale = None
+
+            if "%d" in format:
+                days = (total_seconds - e.seconds) // 86400
+                smallest_scale = "%d"
+            else:
+                days = 0
+
+            if "%H" in format:
+                hours = (total_seconds-(days*86400)) // 3600
+                smallest_scale = "%H"
+            else:
+                hours = 0
+
+            if "%M" in format:
+                minutes = (total_seconds-(days*86400)-(hours*3600)) // 60
+                smallest_scale = "%M"
+            else:
+                minutes = 0
+                
+            if "%S" in format:
+                seconds = total_seconds - (days*86400) - (hours*3600) - (minutes*60)
+                smallest_scale = "%S"
+            else:
+                seconds = 0
+
+            if smallest_scale == "%d":
+                remain_second = total_seconds - (days*86400)
+                if remain_second > 0:
+                    days += remain_second / 86400
+            
+            if smallest_scale == "%H":
+                remain_second = total_seconds - (days*86400) - (hours*3600)
+                if remain_second > 0:
+                    fraction = str(remain_second / 3600)
+                    return str(days), f"{hours:02d}.{fraction[2:]}", f"{minutes:02d}", f"{seconds:02d}"
+            
+            if smallest_scale == "%M":
+                remain_second = total_seconds - (days*86400) - (hours*3600) - (minutes*60)
+                if remain_second > 0:
+                    fraction = str(remain_second / 60)
+                    return str(days), f"{hours:02d}", f"{minutes:02d}.{fraction[2:]}", f"{seconds:02d}"
+            
+            return str(days), f"{hours:02d}", f"{minutes:02d}", f"{seconds:02d}"
+
         elapsed = datetime.now() - self.start_time
-        days, hours, minutes, seconds, microsecond = self.__format_elapsed(elapsed, elapsedformat)
+        days, hours, minutes, seconds = format_time(elapsed, elapsedformat)
         
         elapsed_text = ""
         format_flag = False
@@ -150,15 +195,13 @@ class Logger:
             if format_flag:
                 format_symbol += ch
                 if format_symbol == "%d":
-                    elapsed_text += (days)
+                    elapsed_text += days
                 elif format_symbol == "%H":
                     elapsed_text += hours
                 elif format_symbol == "%M":
                     elapsed_text += minutes
                 elif format_symbol == "%S":
                     elapsed_text += seconds
-                elif format_symbol == "%f":
-                    elapsed_text += microsecond
                 else:
                     elapsed_text += format_symbol
                 format_symbol = ""
@@ -205,78 +248,3 @@ class Logger:
 
     def set_activate(self):
         self._quiet = False
-
-    @staticmethod
-    def __format_elapsed(elapsed, timeformat):
-        if "%d" in timeformat:
-            has_day = True
-        else:
-            has_day = False
-
-        if "%H" in timeformat:
-            has_hour = True
-        else:
-            has_hour = False
-
-        if "%M" in timeformat:
-            has_minute = True
-        else:
-            has_minute = False
-        
-        if "%S" in timeformat:
-            has_second = True
-        else:
-            has_second = False
-
-        if "%f" in timeformat:
-            has_microsecond = True
-        else:
-            has_microsecond = False
-
-        delta_days = elapsed.days
-        delta_seconds = elapsed.seconds
-        microseconds = elapsed.microseconds
-        hours = delta_seconds // 3600
-        minute = (delta_seconds % 3600) // 60
-        seconds = delta_seconds % 60
-        show_day = 0
-        show_hour = 0
-        show_minute = 0
-        show_second = 0
-        show_microsecond = 0
-
-        # if %d not in timeformat, unsqueeze days to hours
-        if has_day:
-            show_day = delta_days
-        else:
-            hours += delta_days * 24
-
-        # if %H not in timeformat, unsqueeze hours to minutes
-        if has_hour:
-            show_hour = hours
-        else:
-            minute += hours * 60
-
-        # if %M not in timeformat, unsqueeze minutes to seconds
-        if has_minute:
-            show_minute = minute
-        else:
-            seconds += minute * 60
-
-        # if %S not in timeformat, unsqueeze seconds to microseconds
-        if has_second:
-            show_second = seconds
-        else:
-            microseconds += seconds * 10**6
-
-        # ignore microsecond when %f not exists in timeformat
-        if has_microsecond:
-            show_microsecond = microseconds
-
-        show_day = str(show_day)
-        show_hour = f"{show_hour:02d}"
-        show_minute = f"{show_minute:02d}"
-        show_second = f"{show_second:02d}"
-        show_microsecond = str(show_microsecond)
-
-        return show_day, show_hour, show_minute, show_second, show_microsecond
