@@ -37,7 +37,7 @@ Supported platforms:
 
     We define a `ConfigDict` for more convenience usage. It is a type of dictionary inherited from `dict`. It has all the features of `dict` while including other more convenient features.
 
-- **Logger**
+- <span style="color: blue;font-weight: bold;font-style: italic">(update)</span> **Logger**
 
     We build a `Logger` for more convenience logging management. Actually, this is a slightly improvement based on [loguru](https://github.com/Delgan/loguru). Refer to [pylog](https://github.com/wmchen/pylog) for more information.
 
@@ -63,7 +63,7 @@ Supported platforms:
 
 - <span style="color: blue;font-weight: bold;font-style: italic">(update)</span> **Database**
 
-    We offer a simple way to operate the database. Supported database backend: MySQL <span style="color: blue;font-weight: bold;font-style: italic">(update)</span>, SQLite (_doing_).
+    We offer a simple way to operate the database including creating a data table, inserting data, deleting data, searching data, and updating data. Supported database backend: MySQL <span style="color: blue;font-weight: bold;font-style: italic">(update)</span>, SQLite (_doing_).
 
 - **Remote Connection**
 
@@ -96,17 +96,6 @@ See all changes in [CHANGELOG](./CHANGELOG.md).
 ## Contributors
 
 We appreciate all the contributors who add new features or fix bugs, as well as the users who offer valuable feedback.
-
-We welcome all contributors, feel free to create an issue or file a pull request and join us! ❤️
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## License
 
