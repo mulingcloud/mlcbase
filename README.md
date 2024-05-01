@@ -6,7 +6,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/mlcbase)](https://pypi.org/project/mlcbase/)
 [![License](https://img.shields.io/github/license/wmchen/mlcbase.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Author](https://img.shields.io/badge/author-Weiming_Chen-royalblue)](https://weimingchen.net)
+[![All Contributors](https://img.shields.io/github/all-contributors/wmchen/mlcbase?color=blue)](./README.md/#contributors)
 
 </div>
 
@@ -102,18 +102,9 @@ We welcome all contributors, feel free to create an issue or file a pull request
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://weimingchen.net/"><img src="https://avatars.githubusercontent.com/u/33000375?v=4?s=100" width="100px;" alt="Weiming Chen"/><br /><sub><b>Weiming Chen</b></sub></a><br /><a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Code">💻</a> <a href="#ideas-wmchen" title="Ideas, Planning, & Feedback">🤔</a> <a href="#projectManagement-wmchen" title="Project Management">📆</a> <a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Tests">⚠️</a> <a href="#tutorial-wmchen" title="Tutorials">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dcsasori"><img src="https://avatars.githubusercontent.com/u/32105419?v=4?s=100" width="100px;" alt="dcsasori"/><br /><sub><b>dcsasori</b></sub></a><br /><a href="#ideas-dcsasori" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/wmchen/mlcbase/commits?author=dcsasori" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.mulingcloud.com/author/yuanshuang-sun/"><img src="https://avatars.githubusercontent.com/u/32105419?v=4?s=100" width="100px;" alt="Yuanshuang Sun"/><br /><sub><b>Yuanshuang Sun</b></sub></a><br /><a href="#ideas-dcsasori" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/wmchen/mlcbase/commits?author=dcsasori" title="Tests">⚠️</a> <a href="#tutorial-dcsasori" title="Tutorials">✅</a></td>
     </tr>
   </tbody>
-  <tfoot>
-    <tr>
-      <td align="center" size="13px" colspan="7">
-        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
-          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
-        </img>
-      </td>
-    </tr>
-  </tfoot>
 </table>
 
 <!-- markdownlint-restore -->

@@ -3,6 +3,12 @@
 backup/
 release/
 release.*
+
+# all-contributors
+node_modules/
+package-lock.json
+
+# misc
 test.*
 .pypirc
 TODO.md

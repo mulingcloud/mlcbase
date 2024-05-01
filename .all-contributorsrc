@@ -4,7 +4,7 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "files": [
-    "README.md"
+    "README.md", "tutorial.ipynb"
   ],
   "imageSize": 100,
   "commit": true,
@@ -25,12 +25,13 @@
     },
     {
       "login": "dcsasori",
-      "name": "dcsasori",
+      "name": "Yuanshuang Sun",
       "avatar_url": "https://avatars.githubusercontent.com/u/32105419?v=4",
-      "profile": "https://github.com/dcsasori",
+      "profile": "https://www.mulingcloud.com/author/yuanshuang-sun/",
       "contributions": [
         "ideas",
-        "test"
+        "test",
+        "tutorial"
       ]
     }
   ],
