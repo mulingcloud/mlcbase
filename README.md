@@ -3,15 +3,11 @@
 </div>
 
 <div align="center">
-    <a href="https://pypi.org/project/mlcbase/">
-        <img src="https://img.shields.io/pypi/v/mlcbase" />
-    </a>
-    <a href="https://github.com/wmchen/mlcbase/blob/main/LICENSE">
-        <img src="https://img.shields.io/github/license/wmchen/mlcbase.svg" />
-    </a>
-    <a href="https://weimingchen.net">
-        <img src="https://img.shields.io/badge/author-Weiming_Chen-royalblue" />
-    </a>
+
+[![PyPI](https://img.shields.io/pypi/v/mlcbase)](https://pypi.org/project/mlcbase/)
+[![License](https://img.shields.io/github/license/wmchen/mlcbase.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Author](https://img.shields.io/badge/author-Weiming_Chen-royalblue)](https://weimingchen.net)
+
 </div>
 
 ## Introduction
@@ -102,11 +98,28 @@ We welcome all contributors, feel free to create an issue or file a pull request
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://weimingchen.net/"><img src="https://avatars.githubusercontent.com/u/33000375?v=4?s=100" width="100px;" alt="Weiming Chen"/><br /><sub><b>Weiming Chen</b></sub></a><br /><a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Code">💻</a> <a href="#ideas-wmchen" title="Ideas, Planning, & Feedback">🤔</a> <a href="#projectManagement-wmchen" title="Project Management">📆</a> <a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Tests">⚠️</a> <a href="#tutorial-wmchen" title="Tutorials">✅</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td align="center" size="13px" colspan="7">
+        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
+          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
+        </img>
+      </td>
+    </tr>
+  </tfoot>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
 
 ## License
 

@@ -1,7 +1,29 @@
 {
-	"projectName": "mlcbase",
-	"projectOwner": "wmchen",
-	"files": ["README.md"],
-	"imageSize": 100,
-	"contributors": []
-  }
+  "projectName": "mlcbase",
+  "projectOwner": "wmchen",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "wmchen",
+      "name": "Weiming Chen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33000375?v=4",
+      "profile": "https://weimingchen.net/",
+      "contributions": [
+        "code",
+        "ideas",
+        "projectManagement",
+        "test",
+        "tutorial"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": true
+}
