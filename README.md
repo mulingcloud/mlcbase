@@ -25,7 +25,7 @@ Supported platforms:
 <details open>
 <summary>Features</summary>
 
-- <span style="color: blue;font-weight: bold;font-style: italic">(update)</span> **Version**
+- $\color{blue}{\textbf{update }}$ **Version**
 
     We define a `Version` class to manage the version of all MuLingCloud modules or applications. The instantiated versions can easily compare their order by using comparision operators, i.e. `==`, `!=`, `<`, `<=`, `>`, `>=`.
 

@@ -31,7 +31,7 @@ class Version:
         epoch (required): An epoch version will be released when a new framework is coming.
         major (required): A major version will be released when there is a major update.
         minor (required): A minor version will be released when there is a minor update
-        state (required): The state of the module or application. Available values: 
+        state (optional): The state of the module or application. Available values: 
                           dev, alpha, beta, rc{num}, release, where the number of rc
                           is optional.
         date  (optional): The date version. The pattern is YYYYMM.
@@ -44,8 +44,8 @@ class Version:
         1.1.0.release
     """
     
-    VERSION_PATTERN = r"^(?P<epoch>\d+)\.(?P<major>\d+)\.(?P<minor>\d+)\." \
-                      r"(?P<state>dev|alpha|beta|rc(?P<rc_number>\d+)?|release)" \
+    VERSION_PATTERN = r"^(?P<epoch>\d+)\.(?P<major>\d+)\.(?P<minor>\d+)" \
+                      r"(\.(?P<state>dev|alpha|beta|rc(?P<rc_number>\d+)?|release))?" \
                       r"(?:\.(?P<date>((?P<year>\d{4})(?P<month>\d{2}))))?$"
 
     def __init__(self, verison: str):
@@ -80,7 +80,10 @@ class Version:
         return self.__match.group("state")
     
     @property
-    def state_number(self) -> Union[int, float]:
+    def __state_number(self) -> Union[int, float]:
+        if self.state is None:
+            return 0
+            
         if self.state == "dev":
             return 1
         
@@ -170,7 +173,7 @@ class Version:
             return self.minor < other.minor
         
         if self.state != other.state:
-            return self.state_number < other.state_number
+            return self.__state_number < other.__state_number
         
         if self.date != other.date:
             return int(self.date) < int(other.date)
@@ -199,7 +202,7 @@ class Version:
             return self.minor < other.minor
         
         if self.state != other.state:
-            return self.state_number < other.state_number
+            return self.__state_number < other.__state_number
         
         if self.date != other.date:
             return int(self.date) <= int(other.date)
@@ -228,7 +231,7 @@ class Version:
             return self.minor > other.minor
         
         if self.state != other.state:
-            return self.state_number > other.state_number
+            return self.__state_number > other.__state_number
         
         if self.date != other.date:
             return int(self.date) > int(other.date)
@@ -257,7 +260,7 @@ class Version:
             return self.minor > other.minor
         
         if self.state != other.state:
-            return self.state_number > other.state_number
+            return self.__state_number > other.__state_number
         
         if self.date != other.date:
             return int(self.date) > int(other.date)
