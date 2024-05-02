@@ -33,11 +33,11 @@ Supported platforms:
 
     We define a `ConfigDict` for more convenience usage. It is a type of dictionary inherited from `dict`. It has all the features of `dict` while including other more convenient features.
 
-- **Logger**
+- $\color{blue}{\textbf{update }}$ **Logger**
 
     We build a `Logger` for more convenience logging management. Actually, this is a slightly improvement based on [loguru](https://github.com/Delgan/loguru). Refer to [pylog](https://github.com/wmchen/pylog) for more information.
 
-- **Runtime Analysis**
+- $\color{blue}{\textbf{update }}$ **Runtime Analysis**
 
     We offer a simple way to evaluate functions in the Python project. All you need is to wrap the target function by a decorator.
 
