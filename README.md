@@ -57,9 +57,9 @@ Supported platforms:
 
     We offer various methods to encrypt and decrypt or verify text, files and passwords including RSA, AES and Hash.
 
-- <span style="color: blue;font-weight: bold;font-style: italic">(update)</span> **Database**
+- $\color{blue}{\textbf{update }}$ **Database**
 
-    We offer a simple way to operate the database. Supported database backend: MySQL <span style="color: blue;font-weight: bold;font-style: italic">(update)</span>, SQLite (_doing_).
+    We offer a simple way to operate the database. Supported database backend: MySQL, SQLite.
 
 - **Remote Connection**
 
@@ -120,4 +120,5 @@ This project is released under the [Apache 2.0 license](https://www.apache.org/l
 ## Repository
 
 - Github Repository: https://github.com/wmchen/mlcbase
+- GitLab Repository: https://gitlab.com/wm-chen/mlcbase
 - Gitee Repository: https://gitee.com/wm-chen/mlcbase
