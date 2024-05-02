@@ -67,6 +67,9 @@ def delete_register_modules(name: str = None):
         assert name in _register_modules.keys(), f"module {name} is not registered"
         del _register_modules[name]
 
+def show_register_modules():
+    return list(_register_modules.keys())
+
 
 def runtime_analysis(start_time: datetime = None, 
                      end_time: datetime = None, 
@@ -91,7 +94,6 @@ def runtime_analysis(start_time: datetime = None,
     module_list.sort(key=lambda x: x['elapsed'], reverse=True)
 
     unit = unit.lower()
-    print(20*'-'+' Module Runtime Analysis '+20*'-')
     if start_time is not None or end_time is not None:
         total_runtime = int((end_time - start_time).total_seconds() * 10**6)
         if unit == "h":
