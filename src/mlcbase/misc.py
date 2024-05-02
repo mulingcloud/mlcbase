@@ -13,16 +13,18 @@
 # limitations under the License.
 
 """
-MuLingCloud base module: miscellaneous
+MuLingCloud base module: miscellaneous features
 
 Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
 """
+import re
 import warnings
 import random
+import base64
+import requests
 from pathlib import Path
 from typing import Optional
-from socket import socket
 
 
 def is_type(p):
@@ -93,40 +95,108 @@ def is_path(p):
         return True
     else:
         return False
-
-
-def is_net_ok():
-    """Test if the internet connection is ok
     
-    Returns:
-        bool: return True if the internet connection is ok, otherwise return False
-    """
-    s = socket()
-    s.settimeout(3)
-    try:
-        status = s.connect_ex(("www.baidu.com", 443))
-        if status == 0:
-            s.close()
+
+def is_url(url: str, 
+           test_connection: bool = True, 
+           timeout: int = 3):
+    pattern = re.compile(r'^(https?://)?'                                   # http or https
+                         r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+'  # domain name
+                         r'(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'             # domain name suffix
+                         r'localhost|'                                      # local host
+                         r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'             # IP address
+                         r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'                     # IPv6
+                         r'(?::\d+)?'                                       # port number
+                         r'(?:/?|[/?]\S+)$', re.IGNORECASE)                 # path
+    matched_url = re.match(pattern, url)
+
+    if test_connection:
+        if matched_url is not None:
+            try:
+                response = requests.get(url, timeout=timeout)
+                if response.status_code < 400:
+                    return True
+                else:
+                    return False
+            except ConnectionError:
+                return False
+        else:
+            return False
+    else:
+        if matched_url is not None:
             return True
         else:
             return False
+        
+
+def is_base64(s):
+    if not (is_str(s) or is_bytes(s)):
+        return False
+    
+    try:
+        base64.b64decode(s)
+        return True
     except:
         return False
             
 
-def random_hex(length: int, seed: Optional[int] = None):
+def random_hex(length: int, seed: Optional[int] = None, uppercase: bool = True):
     """generate a random hex string
 
     Args:
         length (int): the length of the string
         seed (Optional[int], optional): random seed. Defaults to None.
+        uppercase (bool, optional): if True, the string will be uppercase. 
+                                    Defaults to True.
 
     Returns:
         str: hex string
     """
     if is_int(seed):
         random.seed(seed)
-    return ''.join(random.choice('0123456789abcdef') for _ in range(length))
+    
+    charset = "0123456789ABCDEF"
+    if uppercase:
+        result = [random.choice(charset) for _ in range(length)]
+    else:
+        result = [random.choice(charset).lower() for _ in range(length)]
+        
+    return ''.join(result)
+
+
+def random_otp_secret(length: int = 32, 
+                      seed: Optional[int] = None,
+                      uppercase: bool = True):
+    """generate a random OTP secret key
+
+    Args:
+        length (int, optional): the length of the secret key. Defaults to 32.
+        seed (Optional[int], optional): random seed. Defaults to None.
+        uppercase (bool, optional): if True, the string will be uppercase. 
+                                    Defaults to True.
+
+    Raises:
+        ValueError: raise ValueError if the length of the OTP secret key is less 
+                    than 32 or not divisible by 8
+
+    Returns:
+        str: secret key
+    """
+    if length < 32:
+        raise ValueError("The length of the OTP secret key must be at least 32")
+    if length % 8 != 0:
+        raise ValueError("The length of the OTP secret key must be divisible by 8")
+    
+    if is_int(seed):
+        random.seed(seed)
+    
+    charset = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if uppercase:
+        result = [random.choice(charset) for _ in range(length)]
+    else:
+        result = [random.choice(charset).lower() for _ in range(length)]
+        
+    return ''.join(result)
 
 
 class VersionMisMatchError(ValueError):
