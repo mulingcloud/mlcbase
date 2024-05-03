@@ -45,12 +45,15 @@ def load_json(path: PathLikeType, logger: Optional[Logger] = None):
         ConfigDict or None: return a ConfigDict if success, return None if fail
     """
     assert Path(path).exists(), 'json load error: the file is not exist'
-    assert Path(path).suffix == '.json', 'json load error: the suffix must be .json'
+    assert Path(path).suffix.lower() == '.json', 'json load error: the suffix must be .json'
 
     try:
         with open(path, 'r') as f:
             data = json.load(f)
-        return ConfigDict(data)
+        if is_list(data):
+            return data
+        else:
+            return ConfigDict(data)
     except OSError as e:
         if logger is not None:
             logger.error(f'json load error: {str(e)}')
@@ -76,7 +79,7 @@ def save_json(data: Union[list, dict],
         bool: return True if success, return False if fail
     """
     assert is_dict(data) or is_list(data), 'json save error: the saving data must be "dict" or "list" type'
-    assert Path(path).suffix == '.json', 'json save error: the suffix must be .json'
+    assert Path(path).suffix.lower() == '.json', 'json save error: the suffix must be .json'
     if indent is not None:
         assert is_int(indent), 'json save error: the indent must be "int" type'
     
@@ -101,36 +104,39 @@ def load_yaml(path: PathLikeType, logger: Optional[Logger] = None):
         ConfigDict or None: return a ConfigDict if success, return None if fail
     """
     assert Path(path).exists(), 'yaml load error: the file is not exist'
-    assert Path(path).suffix == '.yaml', 'yaml load error: the suffix must be .yaml'
+    assert Path(path).suffix.lower() == '.yaml', 'yaml load error: the suffix must be .yaml'
 
     try:
         with open(path, 'r') as f:
             data = yaml.load(f, Loader=yaml.SafeLoader)
-        return ConfigDict(data)
+        if is_list(data):
+            return data
+        else:
+            return ConfigDict(data)
     except OSError as e:
         if logger is not None:
             logger.error(f'yaml load error: {str(e)}')
         return None
     
 
-def save_yaml(data: dict, 
+def save_yaml(data: Union[dict, list], 
               path: PathLikeType, 
-              allow_unicode: Optional[bool] = None,
+              allow_unicode: bool = False,
               logger: Optional[Logger] = None):
     """save data to a yaml file
 
     Args:
         data (dict)
         path (PathLikeType)
-        allow_unicode (Optional[bool], optional): when allow_unicode=True, allow non-ASCII characters 
-                                                  in the file. Defaults to True.
+        allow_unicode (bool, optional): when allow_unicode=True, allow unicode characters 
+                                        in the file. Defaults to False.
         logger (Optional[Logger], optional): Defaults to None.
 
     Returns:
         bool: return True if success, return False if fail
     """
-    assert is_dict(data), 'yaml save error: the saving data must be "dict" type'
-    assert Path(path).suffix == '.yaml', 'yaml save error: the suffix must be .yaml'
+    assert is_dict(data) or is_list(data), 'yaml save error: the saving data must be "dict" or "list" type'
+    assert Path(path).suffix.lower() == '.yaml', 'yaml save error: the suffix must be .yaml'
 
     try:
         with open(path, 'w') as f:
@@ -153,7 +159,7 @@ def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
         ConfigDict or None: return a dict if success, return None if fail
     """
     assert Path(path).exists(), 'xml load error: the file is not exist'
-    assert Path(path).suffix == '.xml', 'xml load error: the suffix must be .xml'
+    assert Path(path).suffix.lower() == '.xml', 'xml load error: the suffix must be .xml'
 
     try:
         with open(path, 'r') as f:
@@ -184,7 +190,7 @@ def save_xml(data: dict,
         bool: return True if success, return False if fail
     """
     assert is_dict(data), 'xml save error: the saving data must be "dict" type'
-    assert Path(path).suffix == '.xml', 'xml save error: the suffix must be .xml'
+    assert Path(path).suffix.lower() == '.xml', 'xml save error: the suffix must be .xml'
 
     try:
         xml_data = xmltodict.unparse(data, pretty=True, encoding=encoding)
