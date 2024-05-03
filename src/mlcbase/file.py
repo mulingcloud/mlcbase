@@ -18,6 +18,8 @@ MuLingCloud base module: file operation
 Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
 """
+import os
+import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Union
@@ -28,29 +30,138 @@ from .misc import is_str, is_int
 
 PathLikeType = Union[str, Path]
 
+__all__ = ["create", "remove", "listdir", "get_file_size", "get_dir_size", "get_meta_info"]
 
-def mkdir(path: PathLikeType, 
-          parents: bool = True, 
-          exist_ok: bool = True, 
-          logger: Optional[Logger] = None):
-    """make directory
+
+def create(path: PathLikeType,
+           ftype: str = "auto",
+           src: Optional[PathLikeType] = None,
+           exist_ok: bool = True,
+           overwrite: bool = False,
+           logger: Optional[Logger] = None,
+           **kwargs):
+    """create a file, a directory or a symbolic link
 
     Args:
         path (PathLikeType)
-        parents (bool, optional): make parents if parents are not exist. 
-                                  Defaults to True.
-        exist_ok (bool, optional): if set True, when the path exists will 
-                                  not raise error. Defaults to True.
+        ftype (str, optional): options including "auto", "file", "dir", "symlink". Defaults to "auto" 
+                               that determine the file type automactically.
+        src (Optional[PathLikeType], optional): the source of a symbolic link. Defaults to None.
+        exist_ok (bool, optional): if True, skip creating if the file already exists. Defaults to True.
+        overwrite (bool, optional): if True, delete the existing one and create a new one. Only take 
+                                    effect when path exists. Defaults to False.
+        logger (Optional[Logger], optional): Defaults to None.
 
     Returns:
         bool: return True if success, otherwise return False
     """
+    assert ftype in ["auto", "file", "dir", "symlink"], "ftype should be: auto, file, dir, symlink"
+    path = str(path)
+    src = str(src) if src is not None else None
+
+    if os.path.lexists(path):
+        path_exist = True
+        if overwrite:
+            if logger is not None:
+                logger.info(f'{path} already exists, but you try to overwrite it manually...')
+            if not remove(path, logger):
+                return False
+            path_exist = False
+        else:
+            if exist_ok:
+                if logger is not None:
+                    logger.info(f'{path} already exists, skip creating')
+                return True
+    else:
+        path_exist = False
+    
+    if ftype == "auto":
+        if path_exist:
+            if os.path.isfile(path):
+                ftype = "file"
+            elif os.path.isdir(path):
+                ftype = "dir"
+            elif os.path.islink(path):
+                ftype = "symlink"
+            else:
+                if logger is not None:
+                    logger.warning(f'[AUTO] unknown file type: {path}, try to create as a file...')
+                ftype = "file"
+        else:
+            if src is None:
+                suffix = os.path.splitext(path)[1]
+                if suffix == "":
+                    if logger is not None:
+                        logger.info(f'[AUTO] create directory: {path}')
+                    ftype = "dir"
+                else:
+                    if logger is not None:
+                        logger.info(f'[AUTO] create file: {path}')
+                    ftype = "file"
+            else:
+                # if src is provided, it will create a symbolic link
+                if logger is not None:
+                    logger.info(f'[AUTO] create symbolic link: {src} -> {path}')
+                ftype = "symlink"
+
+    if ftype == "file":
+        try:
+            f = open(path, 'w')
+            f.close()
+            return True
+        except OSError as e:
+            if logger is not None:
+                logger.error(f'create file error: {str(e)}')
+            return False
+
+    if ftype == "dir":
+        try:
+            os.makedirs(path)
+            return True
+        except OSError as e:
+            if logger is not None:
+                logger.error(f'create directory error: {str(e)}')
+            return False
+
+    if ftype == "symlink":
+        assert src is not None, "'src' is required when creating symbolic link"
+        assert os.path.exists(src), f'The source of the symbolic link not exists: {src}'
+
+        try:
+            os.symlink(src, path, target_is_directory=kwargs.get("target_is_directory", False))
+            return True
+        except OSError as e:
+            if logger is not None:
+                logger.error(f'create symbolic link error: {str(e)}')
+            return False
+        
+
+def remove(path: PathLikeType, logger: Optional[Logger] = None):
+    path = str(path)
+    assert os.path.lexists(path), f'{path} is not exist'
+    
     try:
-        Path(path).mkdir(parents=parents, exist_ok=exist_ok)
-        return True
+        is_remove = False
+
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+            is_remove = True
+
+        if os.path.isfile(path):
+            os.remove(path)
+            is_remove = True
+
+        if os.path.islink(path):
+            os.unlink(path)
+            is_remove = True
+
+        if not is_remove:
+            if logger is not None:
+                logger.error(f"remove error: unknown file type: {path}")
+        return is_remove
     except OSError as e:
         if logger is not None:
-            logger.error(f'make directory error: {str(e)}')
+            logger.error(f'remove error: {str(e)}')
         return False
 
 
@@ -93,7 +204,7 @@ def get_file_size(path: PathLikeType,
 
     Args:
         path (PathLikeType)
-        return_unit (Optional[str], optional): return specific unit. Defaults to None.
+        return_unit (Optional[str], optional): return a specific unit. Defaults to None.
         auto_unit (bool, optional): auto select unit. Defaults to True.
         truncate_place (int, optional): truncated decimal places, if None do not use the 
                                         truncation operation. Defaults to 2.
@@ -103,8 +214,8 @@ def get_file_size(path: PathLikeType,
     """
     units = ['B', 'KB', 'MB', 'GB', 'TB']
 
-    assert Path(path).exists(), f'{path} not exist'
-    assert Path(path).is_file(), f'{path} is not a file'
+    assert os.path.lexists(path), f'{path} not exist'
+    assert os.path.isfile(path), f'{path} is not a file'
     assert return_unit is None or (is_str(return_unit) and return_unit.upper() in units), \
             f'return_unit should be: B, KB, MB, GB, TB. (lower case is also ok)'
     assert truncate_place is None or (is_int(truncate_place) and truncate_place >= 0), \
@@ -164,8 +275,8 @@ def get_dir_size(path: PathLikeType,
     """
     units = ['B', 'KB', 'MB', 'GB', 'TB']
 
-    assert Path(path).exists(), f'{path} not exist'
-    assert Path(path).is_dir(), f'{path} is not a directory'
+    assert os.path.lexists(path), f'{path} not exist'
+    assert os.path.isdir(path), f'{path} is not a directory'
     assert return_unit is None or (is_str(return_unit) and return_unit.upper() in units), \
             f'return_unit should be: B, KB, MB, GB, TB. (lower case is also ok)'
     assert truncate_place is None or (is_int(truncate_place) and truncate_place >= 0), \
@@ -174,9 +285,9 @@ def get_dir_size(path: PathLikeType,
     total_size = 0
 
     for p in listdir(path):
-        if Path(p).is_file():
+        if os.path.isfile(p):
             total_size += Path(p).stat().st_size
-        if Path(p).is_dir():
+        if os.path.isdir(p):
             total_size += get_dir_size(p, return_unit="B")[0]
 
     if return_unit:
@@ -225,8 +336,7 @@ def get_meta_info(path: PathLikeType):
     Returns:
         ConfigDict: meta information
     """
-    assert Path(path).exists(), f'{path} not exist'
-    # assert Path(path).is_file(), f'{path} is not a file'
+    assert os.path.lexists(path), f'{path} not exist'
     path = Path(path).absolute()
 
     meta_info = ConfigDict()
@@ -238,12 +348,15 @@ def get_meta_info(path: PathLikeType):
         meta_info.type = "file"
         size = get_file_size(path)
         meta_info.size = f"{size[0]} {size[1]}"
-    else:
+    if path.is_dir():
         meta_info.type = "directory"
         size = get_dir_size(path)
         meta_info.size = f"{size[0]} {size[1]}"
-    meta_info.create_time = datetime.fromtimestamp(path.stat().st_ctime).strftime('%Y-%m-%d %H:%M:%S')
-    meta_info.last_access_time = datetime.fromtimestamp(path.stat().st_atime).strftime('%Y-%m-%d %H:%M:%S')
-    meta_info.last_modify_time = datetime.fromtimestamp(path.stat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+    if path.is_symlink():
+        meta_info.type = "symbolic link"
+        meta_info.source = os.readlink(path)
+    meta_info.create_time = datetime.fromtimestamp(path.lstat().st_ctime).strftime('%Y-%m-%d %H:%M:%S')
+    meta_info.last_access_time = datetime.fromtimestamp(path.lstat().st_atime).strftime('%Y-%m-%d %H:%M:%S')
+    meta_info.last_modify_time = datetime.fromtimestamp(path.lstat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')
 
     return meta_info

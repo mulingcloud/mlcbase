@@ -17,9 +17,6 @@ MuLingCloud base module: remote connect
 
 Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
-
-TODO:
-- support multiprocessing for SFTP uploading
 """
 import os
 from pathlib import Path
@@ -29,7 +26,7 @@ from typing import Optional, Union, Callable
 import paramiko
 
 from .logger import Logger
-from .file import listdir, mkdir
+from .file import listdir, create
 from .misc import PlatformNotSupportError
 
 PathLikeType = Union[str, Path]
@@ -345,7 +342,7 @@ class SFTP:
         
         self.logger.info(f'downloading directory: [REMOTE] {remote_path} -> [LOCAL] {local_path}')
         try:
-            if not mkdir(local_path, logger=self.logger):
+            if not create(local_path, ftype="dir", logger=self.logger):
                 self.logger.error(f'failed to create local directory: {local_path}')
                 return False
             

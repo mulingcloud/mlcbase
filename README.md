@@ -23,7 +23,7 @@ Supported platforms:
 - MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
 
 <details open>
-<summary>Features</summary>
+<summary>Features (v1.2.0)</summary>
 
 - $\color{blue}{\textbf{update }}$ **Version**
 
@@ -41,7 +41,7 @@ Supported platforms:
 
     We offer a simple way to evaluate functions in the Python project. All you need is to wrap the target function by a decorator.
 
-- **File Operations**
+- $\color{blue}{\textbf{update }}$ **File Operations**
 
     We offer various features to make file operations easier.
 
@@ -69,7 +69,7 @@ Supported platforms:
 
     We offer a simple API to send email. Currently only supports SMTP (with SSL) server.
 
-- <span style="color: red;font-weight: bold;font-style: italic">(BREAKING CHANGE)</span> **HashiCorp Vault**
+- $\color{red}{\textbf{BREAKING CHANGE }}$ **HashiCorp Vault**
 
     We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported secret engines: KV v1, KV v2, TOTP, Transit (_doing_).
 
