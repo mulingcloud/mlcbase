@@ -43,7 +43,7 @@ Supported platforms:
 
 - $\color{blue}{\textbf{update }}$ **File Operations**
 
-    We offer various features to make file operations easier.
+    We offer various features to make file operations easier. Besides, we offer a simple way to load and save JSON, YAML, and XML files.
 
 - $\color{red}{\textbf{new }}$ **Image IO**
 
@@ -53,7 +53,7 @@ Supported platforms:
 
     We support two methods for OTP: Time-based One-Time Password (TOTP) and HMAC-based One-Time Password (HOTP).
 
-- **Encryption and Decryption**
+- $\color{blue}{\textbf{update }}$ **Encryption and Decryption**
 
     We offer various methods to encrypt and decrypt or verify text, files and passwords including RSA, AES and Hash.
 
@@ -71,7 +71,7 @@ Supported platforms:
 
 - $\color{red}{\textbf{BREAKING CHANGE }}$ **HashiCorp Vault**
 
-    We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported secret engines: KV v1, KV v2, TOTP, Transit (_doing_).
+    We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported secret engines: KV v1, KV v2, TOTP.
 
 </details>
 

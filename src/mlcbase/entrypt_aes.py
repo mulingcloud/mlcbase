@@ -28,15 +28,16 @@ from .misc import is_str, is_bytes
 PathLikeType = Union[str, Path]
 
 
-def __add_16(p: Union[str, bytes], encoding: str = "utf-8"):
-    assert is_str(p) or is_bytes(p), 'p must be str or bytes'
-    if is_str(p):
-        p = p.encode(encoding)
+def __completion(conent: Union[str, bytes], encoding: str = "utf-8"):
+    assert is_str(conent) or is_bytes(conent), 'conent must be str or bytes'
 
-    while len(p) % 16 != 0:
-        p += b'\x00'
+    if is_str(conent):
+        conent = conent.encode(encoding)
     
-    return p
+    while len(conent) % 16 != 0:
+        conent += b'\x00'
+    
+    return conent
 
 
 def aes_encrypt_text(plain_text: str,
@@ -56,11 +57,17 @@ def aes_encrypt_text(plain_text: str,
     Returns:
         bytes: cipher text
     """
+    assert is_str(key) or is_bytes(key), 'key must be str or bytes'
+    assert len(key) in [16, 24, 32], 'the length of key must be 16, 24 or 32'
+    assert iv is None or ((is_str(iv) or is_bytes(iv)) and len(iv) == 16), \
+        'when iv is not None, iv must be str or bytes, and the length of iv should be 16'
     assert mode in [AES.MODE_CBC, AES.MODE_ECB], 'currently only support AES.MODE_CBC or AES.MODE_ECB mode'
-    plain_text = __add_16(plain_text, encoding)
-    key = __add_16(key, encoding)
+
+    key = key.encode(encoding) if is_str(key) else key
     if iv is not None:
-        iv = __add_16(iv, encoding)
+        iv = iv.encode(encoding) if is_str(iv) else iv
+
+    plain_text = __completion(plain_text, encoding)
     
     if mode == AES.MODE_CBC:
         assert iv is not None, 'iv must be provided when using AES.MODE_CBC mode'
@@ -90,12 +97,17 @@ def aes_decrypt_text(cipher_text: bytes,
         encoding (str, optional): Defaults to "utf-8".
 
     Returns:
-        str: plain text
+        str or bytes: return a string if return_str is True, otherwise return a bytes
     """
+    assert is_str(key) or is_bytes(key), 'key must be str or bytes'
+    assert len(key) in [16, 24, 32], 'the length of key must be 16, 24 or 32'
+    assert iv is None or ((is_str(iv) or is_bytes(iv)) and len(iv) == 16), \
+        'when iv is not None, iv must be str or bytes, and the length of iv should be 16'
     assert mode in [AES.MODE_CBC, AES.MODE_ECB], 'currently only support AES.MODE_CBC or AES.MODE_ECB mode'
-    key = __add_16(key)
+
+    key = key.encode(encoding) if is_str(key) else key
     if iv is not None:
-        iv = __add_16(iv)
+        iv = iv.encode(encoding) if is_str(iv) else iv
     
     if mode == AES.MODE_CBC:
         assert iv is not None, 'iv must be provided when using AES.MODE_CBC mode'

@@ -41,7 +41,7 @@ class _EncryptTextThread(Thread):
         self.cipher_text = None
 
     def run(self):
-        default_length = int(self.key_length / 8 - 11)
+        default_length = self.key_length // 8 - 11
         if len(self.plain_text) <= default_length:
             cipher_text = rsa.encrypt(self.plain_text, self.public_key)
         else:
@@ -57,12 +57,13 @@ class _EncryptTextThread(Thread):
 
 
 class _DecryptTextThread(Thread):
-    def __init__(self, cipher_text, private_key, encoding, return_str):
+    def __init__(self, cipher_text, private_key, encoding, return_str, key_length):
         Thread.__init__(self)
         self.cipher_text = cipher_text
         self.private_key = private_key
         self.encoding = encoding
         self.return_str = return_str
+        self.key_length = key_length
         self.plain_text = None
 
     def run(self):
@@ -80,7 +81,8 @@ class _DecryptTextThread(Thread):
         
         if is_bytes(self.cipher_text):
             length = len(self.cipher_text)
-            if length > 128:
+            chunk_length = self.key_length // 8
+            if length > chunk_length:
                 offset = 0
                 if self.return_str:
                     plain_text = ""
@@ -88,17 +90,17 @@ class _DecryptTextThread(Thread):
                     plain_text = b""
 
                 while length - offset > 0:
-                    if length - offset > 128:
+                    if length - offset > chunk_length:
                         if self.return_str:
-                            plain_text += rsa.decrypt(self.cipher_text[offset:offset+128], self.private_key).decode(self.encoding)
+                            plain_text += rsa.decrypt(self.cipher_text[offset:offset+chunk_length], self.private_key).decode(self.encoding)
                         else:
-                            plain_text += rsa.decrypt(self.cipher_text[offset:offset+128], self.private_key)
+                            plain_text += rsa.decrypt(self.cipher_text[offset:offset+chunk_length], self.private_key)
                     else:
                         if self.return_str:
                             plain_text += rsa.decrypt(self.cipher_text[offset:], self.private_key).decode(self.encoding)
                         else:
                             plain_text += rsa.decrypt(self.cipher_text[offset:], self.private_key)
-                    offset += 128
+                    offset += chunk_length
             else:
                 if self.return_str:
                     plain_text = rsa.decrypt(self.cipher_text, self.private_key).decode(self.encoding)
@@ -110,19 +112,25 @@ class _DecryptTextThread(Thread):
 
 def create_rsa_keys(public_path: Optional[PathLikeType] = None, 
                     private_path: Optional[PathLikeType] = None, 
-                    key_length: int = 1024,
+                    key_length: int = 2048,
                     return_keys: bool = False):
     """create a pair of rsa keys
 
     Args:
         public_path (Optional[PathLikeType], optional): Defaults to None.
         private_path (Optional[PathLikeType], optional): Defaults to None.
-        key_length (int, optional): Defaults to 1024.
+        key_length (int, optional): We force the length of key must be larger or equal to 2048 for safety resons. 
+                                    Common options including 2048, 3072, and 4096. Defaults to 2048.
         return_keys (bool, optional): Defaults to False.
 
     Returns:
         tuple or None: return a pair of rsa keys if return_keys is True, otherwise return None
     """
+    assert key_length >= 2048, "Force the key_length must be larger or equal to 2048 for safety resons"
+    assert key_length % 8 == 0, "The length of secret key must be a multiple of 8"
+    assert (public_path is not None and private_path is not None) or return_keys, \
+        "public_path and private_path must be provided if return_keys is False"
+
     (public_key, private_key) = rsa.newkeys(key_length)
     public_key = public_key.save_pkcs1("PEM")
     private_key = private_key.save_pkcs1("PEM")
@@ -143,7 +151,7 @@ def create_rsa_keys(public_path: Optional[PathLikeType] = None,
 
 def rsa_encrypt_text(plain_text: Union[str, bytes], 
                      public_key: Union[bytes, PathLikeType], 
-                     key_length: int = 1024,
+                     key_length: int = 2048,
                      num_threads: int = 1,
                      encoding: str = "utf-8"):
     """encrypt plain text with rsa public key
@@ -151,14 +159,15 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
     Args:
         plain_text (Union[str, bytes])
         public_key (Union[bytes, PathLikeType)
-        key_length (int, optional): Defaults to 1024.
+        key_length (int, optional): Defaults to 2048.
         num_threads (int, optional): thread numbers to use, which is larger or equal to 1. 
-                                    Defaults to 1.
+                                     Defaults to 1.
         encoding (str, optional): Defaults to "utf-8".
 
     Returns:
         bytes or List[bytes]: cipher_text
     """
+    assert key_length % 8 == 0, "The length of secret key must be a multiple of 8"
     assert is_str(plain_text) or is_bytes(plain_text), "plain_text must be a string or bytes"
     assert is_str(public_key) or is_path(public_key) or is_bytes(public_key), \
         "public_key must be a bytes or a path"
@@ -176,7 +185,6 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
     # split plain_text into multiple threads
     if num_threads > 1:
         length = len(plain_text) // num_threads
-        # cipher_dict = {}
         threads = []
         for i in range(num_threads):
             if i < num_threads - 1:
@@ -194,7 +202,7 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
             if is_bytes(thread.cipher_text):
                 cipher_text.append(thread.cipher_text)
     else:
-        default_length = int(key_length / 8 - 11)
+        default_length = key_length // 8 - 11
         if len(plain_text) <= default_length:
             cipher_text = rsa.encrypt(plain_text, key)
         else:
@@ -212,6 +220,7 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
 
 def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
                      private_key: Union[bytes, PathLikeType],
+                     key_length: int = 2048,
                      num_threads: int = 1,
                      return_str: bool = True,
                      encoding: str = "utf-8",):
@@ -220,6 +229,7 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
     Args:
         cipher_text (Union[List[bytes], bytes])
         private_key (Union[bytes, PathLikeType])
+        key_length (int, optional): Defaults to 2048.
         num_threads (int, optional): thread numbers to use, which is larger or equal to 1. 
                                     Defaults to 1.
         return_str (bool, optional): return a string if True, otherwise return a bytes.
@@ -229,6 +239,7 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
     Returns:
         str or bytes: return a string if return_str is True, otherwise return a bytes
     """
+    assert key_length % 8 == 0, "The length of secret key must be a multiple of 8"
     assert is_list(cipher_text) or is_bytes(cipher_text), "cipher_text must be a list or bytes"
     assert is_str(private_key) or is_path(private_key) or is_bytes(private_key), \
         "private_key must be a bytes or a path"
@@ -246,9 +257,9 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
         threads = []
         for i in range(num_threads):
             if i < num_threads - 1:
-                thread = _DecryptTextThread(cipher_text[i*length:(i+1)*length], key, encoding, return_str)
+                thread = _DecryptTextThread(cipher_text[i*length:(i+1)*length], key, encoding, return_str, key_length)
             else:
-                thread = _DecryptTextThread(cipher_text[i*length:], key, encoding, return_str)
+                thread = _DecryptTextThread(cipher_text[i*length:], key, encoding, return_str, key_length)
             threads.append(thread)
             thread.start()
             
@@ -275,7 +286,8 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
         
         if is_bytes(cipher_text):
             length = len(cipher_text)
-            if length > 128:
+            chunk_length = key_length // 8
+            if length > chunk_length:
                 offset = 0
                 if return_str:
                     plain_text = ""
@@ -283,17 +295,17 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
                     plain_text = b""
 
                 while length - offset > 0:
-                    if length - offset > 128:
+                    if length - offset > chunk_length:
                         if return_str:
-                            plain_text += rsa.decrypt(cipher_text[offset:offset+128], key).decode(encoding)
+                            plain_text += rsa.decrypt(cipher_text[offset:offset+chunk_length], key).decode(encoding)
                         else:
-                            plain_text += rsa.decrypt(cipher_text[offset:offset+128], key)
+                            plain_text += rsa.decrypt(cipher_text[offset:offset+chunk_length], key)
                     else:
                         if return_str:
                             plain_text += rsa.decrypt(cipher_text[offset:], key).decode(encoding)
                         else:
                             plain_text += rsa.decrypt(cipher_text[offset:], key)
-                    offset += 128
+                    offset += chunk_length
             else:
                 if return_str:
                     plain_text = rsa.decrypt(cipher_text, key).decode(encoding)
@@ -313,6 +325,7 @@ def rsa_sign_text(plain_text: str,
         plain_text (str)
         private_key (Union[bytes, PathLikeType])
         hash_method (str, optional): Defaults to 'SHA-512'.
+        encoding (str, optional): Defaults to "utf-8".
         
     Returns:
         bytes: signed cipher text
@@ -334,14 +347,14 @@ def rsa_sign_text(plain_text: str,
 
 
 def rsa_verify_signature(plain_text: str,
-                         signed_cipher_text: bytes,
+                         signature: bytes,
                          public_key: Union[bytes, PathLikeType],
                          encoding: str = "utf-8"):
     """verify signature with rsa public key
 
     Args:
         plain_text (str)
-        signed_cipher_text (bytes)
+        signature (bytes)
         public_key (Union[bytes, PathLikeType])
         encoding (str, optional): Defaults to "utf-8".
 
@@ -349,7 +362,7 @@ def rsa_verify_signature(plain_text: str,
         bool: return True if the signature match the plain text, otherwise return False
     """
     assert is_str(plain_text), "plain_text must be a string"
-    assert is_bytes(signed_cipher_text), "signed_cipher_text must be a bytes"
+    assert is_bytes(signature), "signed_cipher_text must be a bytes"
     
     if is_str(public_key) or is_path(public_key):
         with open(public_key, "rb") as f:
@@ -358,7 +371,7 @@ def rsa_verify_signature(plain_text: str,
         key = rsa.PublicKey.load_pkcs1(public_key)
 
     try:
-        rsa.verify(plain_text.encode(encoding), signed_cipher_text, key)
+        rsa.verify(plain_text.encode(encoding), signature, key)
         return True
     except:
         return False
@@ -367,7 +380,7 @@ def rsa_verify_signature(plain_text: str,
 def rsa_encrypt_file(plain_file_path: PathLikeType, 
                      crypto_save_path: PathLikeType, 
                      public_key: Union[bytes, PathLikeType], 
-                     key_length: int = 1024,
+                     key_length: int = 2048,
                      num_process: int = 1,
                      num_threads: int = 1,
                      encoding: str = "utf-8",
@@ -378,7 +391,7 @@ def rsa_encrypt_file(plain_file_path: PathLikeType,
         plain_file_path (PathLikeType)
         crypto_save_path (PathLikeType)
         public_key (Union[bytes, PathLikeType])
-        key_length (int, optional): Defaults to 1024.
+        key_length (int, optional): Defaults to 2048.
         num_process (int, optional): number of processes. Defaults to 1.
         num_threads (int, optional): number of threads. Defaults to 1.
         encoding (str, optional): Defaults to "utf-8".
@@ -455,6 +468,7 @@ def rsa_encrypt_file(plain_file_path: PathLikeType,
 def rsa_decrypt_file(crypto_file_path: PathLikeType,
                      plain_save_path: PathLikeType,
                      private_key: Union[bytes, PathLikeType],
+                     key_length: int = 2048,
                      num_process: int = 1,
                      num_threads: int = 1,
                      encoding: str = "utf-8",
@@ -465,6 +479,7 @@ def rsa_decrypt_file(crypto_file_path: PathLikeType,
         crypto_file_path (PathLikeType)
         plain_save_path (PathLikeType)
         private_key (Union[bytes, PathLikeType])
+        key_length (int, optional): Defaults to 2048.
         num_process (int, optional): number of processes. Defaults to 1.
         num_threads (int, optional): number of threads. Defaults to 1.
         encoding (str, optional): Defaults to "utf-8".
@@ -504,7 +519,7 @@ def rsa_decrypt_file(crypto_file_path: PathLikeType,
             for i in range(num_process):
                 with open(str(crypto_file_path)+f".chunk.{i}", "rb") as f_chunk:
                     chunk = f_chunk.read()
-                    plain = pool.apply_async(rsa_decrypt_text, args=(chunk, private_key, num_threads, False, encoding, ))
+                    plain = pool.apply_async(rsa_decrypt_text, args=(chunk, private_key, key_length, num_threads, False, encoding, ))
                     plain_list.append(plain)
                 Path(str(crypto_file_path)+f".chunk.{i}").unlink()
             pool.close()
@@ -512,7 +527,7 @@ def rsa_decrypt_file(crypto_file_path: PathLikeType,
         else:
             with open(crypto_file_path, 'rb') as f_chunk:
                 chunk = f_chunk.read()
-                plain_list = [rsa_decrypt_text(chunk, private_key, num_threads, False, encoding)]
+                plain_list = [rsa_decrypt_text(chunk, private_key, key_length, num_threads, False, encoding)]
         
         # save
         with open(plain_save_path, "wb") as f_save:
