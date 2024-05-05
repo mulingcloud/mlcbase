@@ -26,7 +26,7 @@ import base64
 from io import BytesIO
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 import pyotp
 from PIL import Image
@@ -42,6 +42,8 @@ _OTP_HMAC = {'SHA1': hashlib.sha1,
               'SHA256': hashlib.sha256,
               'SHA512': hashlib.sha512}
 
+PathLikeType = Union[str, Path]
+
 
 def generate_otp_secret(account_name: str, 
                         method: str = "TOTP",
@@ -52,7 +54,7 @@ def generate_otp_secret(account_name: str,
                         digits: int = 6,
                         return_secret_key: bool = True,
                         return_qr_code: bool = True,
-                        qr_save_path: Optional[str] = None,
+                        qr_save_path: Optional[PathLikeType] = None,
                         qr_config: dict = ConfigDict(version=1,
                                                      error_correction=ERROR_CORRECT_M,
                                                      box_size=10,
@@ -74,12 +76,12 @@ def generate_otp_secret(account_name: str,
         period (int, optional): the length of time in seconds used to generate a counter for the 
                                 TOTP code calculation. Only used for TOTP. Defaults to 30.
         initial_count (int, optional): starting HMAC counter value. Only used for HOTP method. Defaults to 0.
-        digits (int, optional): the number of digits in the generated TOTP code. Defaults to 6.
+        digits (int, optional): the number of digits in the generated OTP code. Defaults to 6.
         return_secret_key (bool, optional): whether to return the secret key. Defaults to True.
         return_qr_code (bool, optional): whether to return the QR code in base64 format. Defaults 
                                          to True.
-        qr_save_path (Optional[str], optional): the path to save the QR code. If None, will not 
-                                                save the QR code. Defaults to None.
+        qr_save_path (Optional[PathLikeType], optional): the path to save the QR code. If None, will not 
+                                                         save the QR code. Defaults to None.
         qr_config (Union[dict, ConfigDict], optional): configuration of the QR code.
         logger (Optional[Logger], optional): Defaults to None.
 
@@ -88,7 +90,7 @@ def generate_otp_secret(account_name: str,
         ConnectionError: if the URL of the logo not accessible
 
     Returns:
-        dict: a dictionary containing the meta data, secret key (optional), and QR code (optional)
+        dict: a ConfigDict containing the meta data, secret key (optional), and QR code (optional)
     """
     method = method.upper()
     assert method in ["TOTP", "HOTP"], f'The method parameter should be "TOTP" or "HOTP".'
@@ -105,6 +107,13 @@ def generate_otp_secret(account_name: str,
                          name=account_name,
                          issuer=issuer,
                          interval=period)
+        result = ConfigDict(metadata=dict(method=method, 
+                                          issuer=issuer,
+                                          account_name=account_name,
+                                          algorithm=algorithm,
+                                          period=period,
+                                          digits=digits))
+
     if method == "HOTP":
         otp = pyotp.HOTP(secret_key,
                          digits=digits,
@@ -112,15 +121,16 @@ def generate_otp_secret(account_name: str,
                          name=account_name,
                          issuer=issuer,
                          initial_count=initial_count)
+        result = ConfigDict(metadata=dict(method=method, 
+                                          issuer=issuer,
+                                          account_name=account_name,
+                                          algorithm=algorithm,
+                                          initial_count=initial_count,
+                                          digits=digits))
+        
     url = otp.provisioning_uri()
-    
-    result = ConfigDict(metadata=dict(method=method, 
-                                      issuer=issuer,
-                                      account_name=account_name,
-                                      algorithm=algorithm,
-                                      period=period,
-                                      digits=digits),
-                        url=url)
+    result.url = url
+
     if return_secret_key:
         result.secret = secret_key
         
@@ -147,12 +157,12 @@ def generate_otp_secret(account_name: str,
                             logger.error(f'The URL {qr_config.logo} is not accessible.')
                         raise ConnectionError(f'The URL {qr_config.logo} is not accessible.')
 
-        qr = QRCode(version=qr_config.version,
-                    error_correction=qr_config.error_correction,
-                    box_size=qr_config.box_size,
-                    border=qr_config.border)
+        qr = QRCode(version=qr_config.get("version", 1),
+                    error_correction=qr_config.get("error_correction", ERROR_CORRECT_M),
+                    box_size=qr_config.get("box_size", 10),
+                    border=qr_config.get("border", 4))
         qr.add_data(url)
-        qr.make(fit=qr_config.fit)
+        qr.make(fit=qr_config.get("fit", True))
         img = qr.make_image(fill_color=qr_config.get("fill_color", "black"), back_color=qr_config.get("back_color", "white"))
 
         if has_logo:
@@ -235,7 +245,7 @@ def verify_otp_code(code: str,
                     for_time: Optional[datetime] = None,
                     valid_window: int = 0,
                     logger: Optional[Logger] = None):
-    """verfify a code
+    """verify a code
 
     Args:
         code (str)
@@ -260,6 +270,7 @@ def verify_otp_code(code: str,
         bool: return True if verification succeeded, otherwise return False
     """
     method = method.upper()
+    assert is_int(valid_window) and valid_window >= 0, f'The valid_window parameter should be a non-negative integer.'
     assert method in ["TOTP", "HOTP"], f'The method parameter should be "TOTP" or "HOTP".'
     if algorithm not in _OTP_HMAC:
         if logger is not None:
@@ -277,6 +288,6 @@ def verify_otp_code(code: str,
                          digits=digits,
                          digest=_OTP_HMAC[algorithm],
                          initial_count=initial_count)
-        matched = otp.verify(code, count=count)
+        matched = otp.verify(code, counter=count)
 
     return matched
