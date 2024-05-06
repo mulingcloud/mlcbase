@@ -37,7 +37,7 @@ from .logger import Logger
 from .file import get_file_size
 from .conifg import ConfigDict
 from .remote_connect import SFTP
-from .misc import is_str, FileTooLargeError, FileUploadError
+from .misc import is_str, is_dict, FileTooLargeError, FileUploadError
 
 PathLikeType = Union[str, Path]
 
@@ -61,7 +61,7 @@ class SMTPAPI:
             port (int)
             name (str): sender name
             address (str): sender email address
-            password (str): _description_
+            password (str): the password or the authorize code
             timeout (int, optional): Defaults to 30 seconds.
             chunk_size (int, optional): large attachment chunk size. if large than the chunk_size, 
                                         the large attachment will upload to the remote sever rather 
@@ -98,7 +98,7 @@ class SMTPAPI:
                    content: str,
                    signature: Optional[str] = None,
                    attachment: Optional[Union[PathLikeType, List[PathLikeType]]] = None,
-                   remote_server_config: Optional[ConfigDict] = None,
+                   remote_server_config: Optional[dict] = None,
                    encoding: str = "utf-8"):
         """send email
 
@@ -109,8 +109,8 @@ class SMTPAPI:
             content (str): content of the email (will be parsed to html)
             signature (Optional[str], optional): signature at the botom of the email message. Defaults to None.
             attachment (Optional[Union[PathLikeType, List[PathLikeType]]], optional): attachments' path. Defaults to None.
-            remote_server_config (Optional[ConfigDict], optional): config of the remote server, is required when the large 
-                                                                   attachments are included. Defaults to None.
+            remote_server_config (Optional[dict], optional): config of the remote server, is required when the large 
+                                                             attachments are included. Defaults to None.
             encoding (str, optional): Defaults to "utf-8".
             
         Form of remote_server_config:
@@ -141,6 +141,10 @@ class SMTPAPI:
             receiver_name = [receiver_name]
             receiver_email = [receiver_email]
         assert len(receiver_name) == len(receiver_email), "receiver_name and receiver_email should have the same length"
+        assert remote_server_config is None or is_dict(remote_server_config), \
+            "if remote_server_config is not None, it should be a dict"
+        if is_dict(remote_server_config):
+            remote_server_config = ConfigDict(remote_server_config)
         
         # distinguish attachments with chunk size
         if attachment is not None:
@@ -168,26 +172,26 @@ class SMTPAPI:
             has_attachment = False
         
         # upload large attachment to remote server
-        if has_attachment:
+        if has_attachment and len(upload2remote) > 0:
+            sftp_api = SFTP(host=remote_server_config.host,
+                            port=remote_server_config.port,
+                            user=remote_server_config.user,
+                            password=remote_server_config.password,
+                            work_dir=self.work_dir,
+                            logger=self.logger,
+                            quiet=self.quiet)
+            if sftp_api is None:
+                raise ConnectionError("remote server connect error")
+            
             save_dir = remote_server_config.save_director
             remote_platform = remote_server_config.remote_platform
             callback = remote_server_config.callback
-            if len(upload2remote) > 0:
-                sftp_api = SFTP(host=remote_server_config.host,
-                                port=remote_server_config.port,
-                                user=remote_server_config.user,
-                                password=remote_server_config.password,
-                                work_dir=self.work_dir,
-                                logger=self.logger,
-                                quiet=self.quiet)
-                if sftp_api is None:
-                    raise ConnectionError("remote server connect error")
 
-                for p in upload2remote:
-                    if not sftp_api.upload_file(p, os.path.join(save_dir, Path(p).name), remote_platform, callback):
-                        raise FileUploadError(f"{p} upload to remote server error")
-                
-                sftp_api.close()
+            for p in upload2remote:
+                if not sftp_api.upload_file(p, os.path.join(save_dir, Path(p).name), remote_platform, callback):
+                    raise FileUploadError(f"{p} upload to remote server error")
+            
+            sftp_api.close()
 
         # build email content and attachments
         for name, email in zip(receiver_name, receiver_email):

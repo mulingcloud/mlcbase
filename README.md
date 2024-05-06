@@ -65,7 +65,7 @@ Supported platforms:
 
     We support SSH and SFTP for remote connection.
 
-- **Email**
+- $\color{blue}{\textbf{update }}$ **Email**
 
     We offer a simple API to send email. Currently only supports SMTP (with SSL) server.
 
