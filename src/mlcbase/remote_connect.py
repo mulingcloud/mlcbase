@@ -15,6 +15,12 @@
 """
 MuLingCloud base module: remote connect
 
+Supported OS:
+- Linux
+- Windows
+
+TODO: support MacOS
+
 Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
 """
@@ -162,15 +168,15 @@ class SFTP:
             return None
 
     def upload_file(self, 
-                    local_path: str,
-                    remote_path: str,
+                    local_path: PathLikeType,
+                    remote_path: PathLikeType,
                     remote_platform: str,
                     callback: Optional[Callable] = None):
         """upload a file to remote server
 
         Args:
-            local_path (str)
-            remote_path (str)
+            local_path (PathLikeType)
+            remote_path (PathLikeType)
             remote_platform (str)
             callback (Optional[Callable], optional): callback function. Defaults to None.
 
@@ -205,15 +211,15 @@ class SFTP:
             return False
         
     def download_file(self,
-                      remote_path: str,
-                      local_path: str,
+                      remote_path: PathLikeType,
+                      local_path: PathLikeType,
                       remote_platform: str,
                       callback: Optional[Callable] = None):
         """download a file from remote server
 
         Args:
-            remote_path (str)
-            local_path (str)
+            remote_path (PathLikeType)
+            local_path (PathLikeType)
             remote_platform (str)
             callback (Optional[Callable], optional): callback function. Defaults to None.
 
@@ -248,15 +254,15 @@ class SFTP:
             return False
         
     def upload_dir(self,
-                   local_path: str,
-                   remote_path: str,
+                   local_path: PathLikeType,
+                   remote_path: PathLikeType,
                    remote_platform: str,
                    callback: Optional[Callable] = None):
         """upload a directory to remote server
 
         Args:
-            local_path (str)
-            remote_path (str)
+            local_path (PathLikeType)
+            remote_path (PathLikeType)
             remote_platform (str)
             callback (Optional[Callable], optional): callback function. Defaults to None.
 
@@ -307,15 +313,15 @@ class SFTP:
             return False
         
     def download_dir(self,
-                     remote_path: str,
-                     local_path: str,
+                     remote_path: PathLikeType,
+                     local_path: PathLikeType,
                      remote_platform: str,
                      callback: Optional[Callable] = None):
         """download a directory from remote server
 
         Args:
-            remote_path (str)
-            local_path (str)
+            remote_path (PathLikeType)
+            local_path (PathLikeType)
             remote_platform (str)
             callback (Optional[Callable], optional): callback function. Defaults to None.
 
@@ -367,11 +373,13 @@ class SFTP:
             self.logger.error(f"sftp download directory error: {str(e)}")
             return False
         
-    def remote_exists(self, remote_path: str, remote_platform: str):
+    def remote_exists(self, 
+                      remote_path: PathLikeType, 
+                      remote_platform: str):
         """check if remote path exists
 
         Args:
-            remote_path (str)
+            remote_path (PathLikeType)
             remote_platform (str)
 
         Raises:
@@ -397,11 +405,13 @@ class SFTP:
         except:
             return False
         
-    def remote_is_file(self, remote_path: str, remote_platform: str):
+    def remote_is_file(self, 
+                       remote_path: PathLikeType, 
+                       remote_platform: str):
         """check if remote path is a file
 
         Args:
-            remote_path (str)
+            remote_path (PathLikeType)
             remote_platform (str)
 
         Raises:
@@ -428,11 +438,13 @@ class SFTP:
             return True
         
         
-    def remote_is_dir(self, remote_path: str, remote_platform: str):
+    def remote_is_dir(self, 
+                      remote_path: PathLikeType, 
+                      remote_platform: str):
         """check if remote path is a directory
 
         Args:
-            remote_path (str)
+            remote_path (PathLikeType)
             remote_platform (str)
 
         Raises:
@@ -459,13 +471,13 @@ class SFTP:
             return False
         
     def remote_mkdir(self, 
-                     remote_path: str, 
+                     remote_path: PathLikeType, 
                      remote_platform: str,
                      exist_ok: bool = True):
         """make a remote directory
 
         Args:
-            remote_path (str)
+            remote_path (PathLikeType)
             remote_platform (str)
             exist_ok (bool, optional): if True, the directory will not be created if 
                                        it already exists. Defaults to True.
@@ -513,13 +525,13 @@ class SFTP:
         return status
     
     def remote_listdir(self,
-                       remote_path: str, 
+                       remote_path: PathLikeType, 
                        remote_platform: str,
                        return_path: bool = True):
         """list remote directory
 
         Args:
-            remote_path (str)
+            remote_path (PathLikeType)
             remote_platform (str)
             return_path (bool, optional): return the path of the remote file if True, 
                                           otherwise return the name of the remote file. 
@@ -563,7 +575,6 @@ class SFTP:
             path = path.replace('/', '\\')
         if platform == 'linux':
             path = path.replace('\\', '/')
-        # TODO: support MacOS
         return path
 
     def _set_logger(self, logger: Optional[Logger], quiet: bool):
