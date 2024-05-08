@@ -21,7 +21,7 @@ import base64
 import requests
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional, Union, Any
 
 import numpy as np
 import cv2
@@ -32,9 +32,11 @@ from .logger import Logger
 from .conifg import ConfigDict
 from .misc import is_url, is_base64
 
+PathLikeType = Union[str, Path]
+
 
 def get_image_from_url(url: str, 
-                       save_path: Optional[str] = None,
+                       save_path: Optional[PathLikeType] = None,
                        return_base64: bool = False,
                        return_image: bool = False,
                        backend: str = "cv2",
@@ -61,7 +63,6 @@ def get_image_from_url(url: str,
         if logger is not None:
             logger.error(f"Invalid url: {url}")
         raise ValueError(f"Invalid url: {url}")
-    assert return_base64 or return_image, "At least one of return_bs64 and return_image must be True"
     assert backend in ["cv2", "pillow", "plt"], f"Invalid backend: {backend}"
     
     response = requests.get(url)
@@ -105,7 +106,7 @@ def get_image_from_url(url: str,
         raise ValueError(f"Failed to get image from url: {url}")
 
 
-def load_image(path: str, 
+def load_image(path: PathLikeType, 
                backend: str = "cv2", 
                logger: Optional[Logger] = None,
                **kwargs):
@@ -120,7 +121,7 @@ def load_image(path: str,
         FileNotFoundError: if the path of the local image not exists
 
     Returns:
-        np.ndarray or PIL.Image: depends on the backend
+        np.ndarray or PIL.Image or bytes: depends on the backend
     """
     assert backend in ["cv2", "pillow", "plt", "base64"], f"Invalid backend: {backend}"
 
@@ -156,7 +157,7 @@ def load_image(path: str,
 
 
 def save_image(img: Any, 
-               path: str, 
+               path: PathLikeType, 
                backend: str = "cv2", 
                logger: Optional[Logger] = None,
                **kwargs):
