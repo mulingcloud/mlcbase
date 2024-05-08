@@ -1,0 +1,25 @@
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | INFO | This is a info (save in local log file)
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | DEBUG | This is a debug (save in local log file)
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | WARNING | This is a warning (save in local log file)
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | ERROR | This is a error (save in local log file)
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | CRITICAL | This is a critical (save in local log file)
+2024.05.02 | 0 day(s) 00:00:00 | INFO | This is a info (custom time format of now_time)
+2024.05.02 | 0 day(s) 00:00:00 | DEBUG | This is a debug (custom time format of now_time)
+2024.05.02 | 0 day(s) 00:00:00 | WARNING | This is a warning (custom time format of now_time)
+2024.05.02 | 0 day(s) 00:00:00 | ERROR | This is a error (custom time format of now_time)
+2024.05.02 | 0 day(s) 00:00:00 | CRITICAL | This is a critical (custom time format of now_time)
+2024-05-02 22:42:13 | 00:00:00.1993 | INFO | This is a info (custom time format of elapsed)
+2024-05-02 22:42:13 | 00:00:00.1993 | DEBUG | This is a debug (custom time format of elapsed)
+2024-05-02 22:42:13 | 00:00:00.2990 | WARNING | This is a warning (custom time format of elapsed)
+2024-05-02 22:42:13 | 00:00:00.2990 | ERROR | This is a error (custom time format of elapsed)
+2024-05-02 22:42:13 | 00:00:00.3986 | CRITICAL | This is a critical (custom time format of elapsed)
+2024-05-02 14:42:13 | 0 day(s) 00:00:00 | INFO | This is a info (custom timezone)
+2024-05-02 14:42:13 | 0 day(s) 00:00:00 | DEBUG | This is a debug (custom timezone)
+2024-05-02 14:42:13 | 0 day(s) 00:00:00 | WARNING | This is a warning (custom timezone)
+2024-05-02 14:42:13 | 0 day(s) 00:00:00 | ERROR | This is a error (custom timezone)
+2024-05-02 14:42:13 | 0 day(s) 00:00:00 | CRITICAL | This is a critical (custom timezone)
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | INFO | This is a info in activate mode
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | DEBUG | This is a debug in activate mode
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | WARNING | This is a warning in activate mode
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | ERROR | This is a error in activate mode
+2024-05-02 22:42:13 | 0 day(s) 00:00:00 | CRITICAL | This is a critical in activate mode

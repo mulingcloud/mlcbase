@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module>
+	<name>mlcbase</name>
+	<repository>
+		<github>https://github.com/wmchen/mlcbase</github>
+		<gitlab>https://gitlab.com/wm-chen/mlcbase</gitlab>
+		<gitee>https://gitee.com/wm-chen/mlcbase</gitee>
+	</repository>
+	<author>Weiming Chen</author>
+	<contributors>Yuanshuang Sun</contributors>
+	<location>中国大陆</location>
+</module>

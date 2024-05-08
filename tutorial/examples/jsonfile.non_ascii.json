@@ -1,0 +1,13 @@
+{
+    "name": "mlcbase",
+    "repository": {
+        "github": "https://github.com/wmchen/mlcbase",
+        "gitlab": "https://gitlab.com/wm-chen/mlcbase",
+        "gitee": "https://gitee.com/wm-chen/mlcbase"
+    },
+    "author": "Weiming Chen",
+    "contributors": [
+        "Yuanshuang Sun"
+    ],
+    "location": "中国大陆"
+}
