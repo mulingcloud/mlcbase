@@ -23,9 +23,10 @@ Tester: Weiming Chen, Yuanshaung Sun
 import json
 from pathlib import Path
 from typing import Optional, Union
+import xml.etree.ElementTree as ET
+import xml.dom.minidom as minidom
 
 import yaml
-import xmltodict
 
 from .logger import Logger
 from .conifg import ConfigDict
@@ -146,6 +147,42 @@ def save_yaml(data: Union[dict, list],
         if logger is not None:
             logger.error(f'yaml save error: {str(e)}')
         return False
+    
+    
+class _XMLParser:
+    def __init__(self, path: PathLikeType):
+        tree = ET.parse(path)
+        root = tree.getroot()
+        self.data = {root.tag: self.__parse_node(root, self.__get_child_nodes_name(root))}
+
+    def __parse_node(self, parent, child_nodes_name):
+        data = {}
+        for child in parent:
+            child_name = child.tag
+            child_num = child_nodes_name[child_name]
+            if child_num > 1:
+                if child_name not in data.keys():
+                    data[child_name] = []
+                data[child_name].append(self.__parse_node(child, self.__get_child_nodes_name(child)))
+            else:
+                if self.__has_child(child):
+                    data[child_name] = self.__parse_node(child, self.__get_child_nodes_name(child))
+                else:
+                    data[child_name] = child.text
+        return data
+
+    @staticmethod
+    def __get_child_nodes_name(parent):
+        child_nodes_name = dict()
+        for child in parent:
+            if child.tag not in child_nodes_name.keys():
+                child_nodes_name[child.tag] = 0
+            child_nodes_name[child.tag] += 1
+        return child_nodes_name
+    
+    @staticmethod
+    def __has_child(parent):
+        return len(parent) > 0
 
 
 def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
@@ -162,12 +199,8 @@ def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
     assert Path(path).suffix.lower() == '.xml', 'xml load error: the suffix must be .xml'
 
     try:
-        with open(path, 'r') as f:
-            data = f.read()
-        data_orderedD = xmltodict.parse(data)
-        data_json = json.dumps(data_orderedD, indent=4)
-        data_dict = json.loads(data_json)
-        return ConfigDict(data_dict)
+        parser = _XMLParser(path)
+        return ConfigDict(parser.data)
     except OSError as e:
         if logger is not None:
             logger.error(f'xml load error: {str(e)}')
@@ -177,6 +210,8 @@ def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
 def save_xml(data: dict, 
              path: PathLikeType, 
              encoding: str = 'utf-8',
+             pretty: bool = True,
+             indent: str = '\t',
              logger: Optional[Logger] = None,):
     """save data to a xml file
 
@@ -184,18 +219,45 @@ def save_xml(data: dict,
         data (dict)
         path (PathLikeType)
         encoding (str, optional): Defaults to 'utf-8'.
+        pretty (bool, optional): Whether to save formatted XML file. Defaults to True.
+        indent (str, optional): Defaults to "\t".
         logger (Optional[Logger], optional): Defaults to None.
 
     Returns:
         bool: return True if success, return False if fail
     """
+    def wrap_node(parent: object, node_data: Union[dict, list, str], node_name: str):
+        if is_dict(node_data):
+            for key, value in node_data.items():
+                if is_dict(value):
+                    child = ET.SubElement(parent, str(key))
+                    wrap_node(child, value, str(key))
+                else:
+                    wrap_node(parent, value, str(key))
+        elif is_list(node_data):
+            for sub_data in node_data:
+                child = ET.SubElement(parent, str(node_name))
+                wrap_node(child, sub_data, str(node_name))
+        else:
+            child = ET.SubElement(parent, str(node_name))
+            child.text = str(node_data)
+            
     assert is_dict(data), 'xml save error: the saving data must be "dict" type'
+    assert len(list(data.keys())) == 1, "xml save error: data should be a dict with single key"
     assert Path(path).suffix.lower() == '.xml', 'xml save error: the suffix must be .xml'
 
     try:
-        xml_data = xmltodict.unparse(data, pretty=True, encoding=encoding)
-        with open(path, 'w') as f:
-            f.write(xml_data)
+        root_name = str(list(data.keys())[0])
+        root = ET.Element(root_name)
+        wrap_node(root, data[root_name], root_name)
+        if pretty:
+            xml_string = ET.tostring(root, encoding=encoding)
+            formatted_xml = minidom.parseString(xml_string).toprettyxml(indent=indent, encoding=encoding)
+            with open(path, 'wb') as f:
+                f.write(formatted_xml)
+        else:
+            tree = ET.ElementTree(root)
+            tree.write(path, encoding=encoding)
         return True
     except OSError as e:
         if logger is not None:
