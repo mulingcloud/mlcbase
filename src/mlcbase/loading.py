@@ -147,62 +147,6 @@ def save_yaml(data: Union[dict, list],
         if logger is not None:
             logger.error(f'yaml save error: {str(e)}')
         return False
-    
-    
-class _XMLParser:
-    def __init__(self, path: PathLikeType):
-        tree = ET.parse(path)
-        root = tree.getroot()
-        self.data = {root.tag: self.__parse_node(root, self.__get_child_nodes_name(root))}
-        self.attrib = {root.tag: {"__attrib__": root.attrib, 
-                                  "child": self.__parse_node_attributes(root, self.__get_child_nodes_name(root))}}
-
-    def __parse_node(self, parent, child_nodes_name):
-        data = {}
-        for child in parent:
-            child_name = child.tag
-            child_num = child_nodes_name[child_name]
-            if child_num > 1:
-                if child_name not in data.keys():
-                    data[child_name] = []
-                data[child_name].append(self.__parse_node(child, self.__get_child_nodes_name(child)))
-            else:
-                if self.__has_child(child):
-                    data[child_name] = self.__parse_node(child, self.__get_child_nodes_name(child))
-                else:
-                    data[child_name] = child.text
-        return data
-    
-    def __parse_node_attributes(self, parent, child_nodes_name):
-        attrib = {}
-        for child in parent:
-            child_name = child.tag
-            child_num = child_nodes_name[child_name]
-            if child_num > 1:
-                if child_name not in attrib.keys():
-                    attrib[child_name] = []
-                attrib[child_name].append({"__attrib__": child.attrib, 
-                                           "child": self.__parse_node_attributes(child, self.__get_child_nodes_name(child))})
-            else:
-                if self.__has_child(child):
-                    attrib[child_name] = {"__attrib__": child.attrib, 
-                                          "child": self.__parse_node_attributes(child, self.__get_child_nodes_name(child))}
-                else:
-                    attrib[child_name] = {"__attrib__": child.attrib, "child": None}
-        return attrib
-
-    @staticmethod
-    def __get_child_nodes_name(parent):
-        child_nodes_name = dict()
-        for child in parent:
-            if child.tag not in child_nodes_name.keys():
-                child_nodes_name[child.tag] = 0
-            child_nodes_name[child.tag] += 1
-        return child_nodes_name
-    
-    @staticmethod
-    def __has_child(parent):
-        return len(parent) > 0
 
 
 def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
