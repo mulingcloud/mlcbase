@@ -217,7 +217,10 @@ def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
     try:
         tree = ET.parse(path)
         root = tree.getroot()
-        xml_data = {root.tag: parse_node(root, get_child_nodes_name(root))}
+        xml_data = {}
+        xml_data[root.tag] = parse_node(root, get_child_nodes_name(root))
+        for k, v in root.attrib.items():
+            xml_data[root.tag][f"@{k}"] = v
         return ConfigDict(xml_data)
     except OSError as e:
         if logger is not None:
