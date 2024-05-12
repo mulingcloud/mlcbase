@@ -154,6 +154,8 @@ class _XMLParser:
         tree = ET.parse(path)
         root = tree.getroot()
         self.data = {root.tag: self.__parse_node(root, self.__get_child_nodes_name(root))}
+        self.attrib = {root.tag: {"__attrib__": root.attrib, 
+                                  "child": self.__parse_node_attributes(root, self.__get_child_nodes_name(root))}}
 
     def __parse_node(self, parent, child_nodes_name):
         data = {}
@@ -170,6 +172,24 @@ class _XMLParser:
                 else:
                     data[child_name] = child.text
         return data
+    
+    def __parse_node_attributes(self, parent, child_nodes_name):
+        attrib = {}
+        for child in parent:
+            child_name = child.tag
+            child_num = child_nodes_name[child_name]
+            if child_num > 1:
+                if child_name not in attrib.keys():
+                    attrib[child_name] = []
+                attrib[child_name].append({"__attrib__": child.attrib, 
+                                           "child": self.__parse_node_attributes(child, self.__get_child_nodes_name(child))})
+            else:
+                if self.__has_child(child):
+                    attrib[child_name] = {"__attrib__": child.attrib, 
+                                          "child": self.__parse_node_attributes(child, self.__get_child_nodes_name(child))}
+                else:
+                    attrib[child_name] = {"__attrib__": child.attrib, "child": None}
+        return attrib
 
     @staticmethod
     def __get_child_nodes_name(parent):
@@ -195,12 +215,66 @@ def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
     Returns:
         ConfigDict or None: return a dict if success, return None if fail
     """
+    def has_child(parent):
+        return len(parent) > 0
+    
+    def get_child_nodes_name(parent):
+        child_nodes_name = dict()
+        for child in parent:
+            if child.tag not in child_nodes_name.keys():
+                child_nodes_name[child.tag] = 0
+            child_nodes_name[child.tag] += 1
+        return child_nodes_name
+    
+    def parse_node(parent, child_nodes_name):
+        if has_child(parent):
+            data = {}
+            for child in parent:
+                child_name = child.tag
+                child_attrib = child.attrib
+                child_num = child_nodes_name[child_name]
+                if child_num > 1:
+                    if child_name not in data.keys():
+                        data[child_name] = []
+                    if len(list(child_attrib.keys())) > 0:
+                        list_data = {}
+                        for k, v in child_attrib.items():
+                            list_data[f"@{k}"] = v
+                        list_data.update(parse_node(child, get_child_nodes_name(child)))
+                        data[child_name].append(list_data)
+                    else:
+                        data[child_name].append(parse_node(child, get_child_nodes_name(child)))
+                else:
+                    data[child_name] = {}
+                    for k, v in child_attrib.items():
+                        data[child_name][f"@{k}"] = v
+
+                    if has_child(child):
+                        data[child_name].update(parse_node(child, get_child_nodes_name(child)))
+                    else:
+                        if len(list(filter(lambda x: x.startswith("@"), data[child_name].keys()))) > 0:
+                            data[child_name]["#text"] = child.text
+                        else:
+                            data[child_name] = child.text
+        else:
+            attrib = parent.attrib
+            if len(list(attrib.keys())) > 0:
+                data = {}
+                for k, v in attrib.items():
+                    data[f"@{k}"] = v
+                data['#text'] = parent.text
+            else:
+                data = parent.text
+        return data
+
     assert Path(path).exists(), 'xml load error: the file is not exist'
     assert Path(path).suffix.lower() == '.xml', 'xml load error: the suffix must be .xml'
 
     try:
-        parser = _XMLParser(path)
-        return ConfigDict(parser.data)
+        tree = ET.parse(path)
+        root = tree.getroot()
+        xml_data = {root.tag: parse_node(root, get_child_nodes_name(root))}
+        return ConfigDict(xml_data)
     except OSError as e:
         if logger is not None:
             logger.error(f'xml load error: {str(e)}')
@@ -226,21 +300,42 @@ def save_xml(data: dict,
     Returns:
         bool: return True if success, return False if fail
     """
-    def wrap_node(parent: object, node_data: Union[dict, list, str], node_name: str):
+    def wrap_node(parent: object, node_data: Union[dict, list, str], node_name: str, is_root: bool):
         if is_dict(node_data):
-            for key, value in node_data.items():
-                if is_dict(value):
-                    child = ET.SubElement(parent, str(key))
-                    wrap_node(child, value, str(key))
+            if len(list(filter(lambda x: x.startswith("@"), node_data.keys()))) == len(node_data.keys()):
+                raise SyntaxError(f"xml save error: all the node data are attributes without child node "
+                                  f"or text: {', '.join(list(node_data.keys()))}")
+
+            if is_root:
+                if "#text" in node_data.keys():
+                    parent.text = str(node_data["#text"])
                 else:
-                    wrap_node(parent, value, str(key))
+                    for k, v in node_data.items():
+                        if k.startswith("@"):
+                            continue
+                        wrap_node(parent, v, str(k), False)
+            else:
+                child_attrib_names = list(filter(lambda x: x.startswith("@"), node_data.keys()))
+                child_attrib = {}
+                for name in child_attrib_names:
+                    child_attrib[name[1:]] = node_data[name]
+                child = ET.SubElement(parent, str(node_name), attrib=child_attrib)
+                if "#text" in node_data.keys():
+                    child.text = str(node_data["#text"])
+                else:
+                    for k, v in node_data.items():
+                        if k.startswith("@"):
+                            continue
+                        wrap_node(child, v, str(k), False)
         elif is_list(node_data):
             for sub_data in node_data:
-                child = ET.SubElement(parent, str(node_name))
-                wrap_node(child, sub_data, str(node_name))
+                wrap_node(parent, sub_data, str(node_name), False)
         else:
-            child = ET.SubElement(parent, str(node_name))
-            child.text = str(node_data)
+            if not is_root:
+                child = ET.SubElement(parent, str(node_name))
+                child.text = str(node_data)
+            else:
+                parent.text = str(node_data)
             
     assert is_dict(data), 'xml save error: the saving data must be "dict" type'
     assert len(list(data.keys())) == 1, "xml save error: data should be a dict with single key"
@@ -248,8 +343,17 @@ def save_xml(data: dict,
 
     try:
         root_name = str(list(data.keys())[0])
-        root = ET.Element(root_name)
-        wrap_node(root, data[root_name], root_name)
+        if is_dict(data[root_name]):
+            root_attrib_names = list(filter(lambda x: x.startswith("@"), data[root_name].keys()))
+            root_attrib = {}
+            for name in root_attrib_names:
+                root_attrib[name[1:]] = data[root_name][name]
+            root = ET.Element(root_name, attrib=root_attrib)
+            wrap_node(root, data[root_name], root_name, True)
+        else:
+            root = ET.Element(root_name)
+            wrap_node(root, data[root_name], root_name, True)
+
         if pretty:
             xml_string = ET.tostring(root, encoding=encoding)
             formatted_xml = minidom.parseString(xml_string).toprettyxml(indent=indent, encoding=encoding)
