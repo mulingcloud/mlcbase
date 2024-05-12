@@ -105,7 +105,7 @@ def load_yaml(path: PathLikeType, logger: Optional[Logger] = None):
         ConfigDict or None: return a ConfigDict if success, return None if fail
     """
     assert Path(path).exists(), 'yaml load error: the file is not exist'
-    assert Path(path).suffix.lower() == '.yaml', 'yaml load error: the suffix must be .yaml'
+    assert Path(path).suffix.lower() in [".yml", ".yaml"], 'yaml load error: the suffix must be .yml or .yaml'
 
     try:
         with open(path, 'r') as f:
@@ -137,7 +137,7 @@ def save_yaml(data: Union[dict, list],
         bool: return True if success, return False if fail
     """
     assert is_dict(data) or is_list(data), 'yaml save error: the saving data must be "dict" or "list" type'
-    assert Path(path).suffix.lower() == '.yaml', 'yaml save error: the suffix must be .yaml'
+    assert Path(path).suffix.lower() in [".yml", ".yaml"], 'yaml save error: the suffix must be .yml or .yaml'
 
     try:
         with open(path, 'w') as f:
