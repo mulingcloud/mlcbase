@@ -19,6 +19,7 @@ Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
 """
 import re
+import uuid
 import warnings
 import random
 import base64
@@ -197,6 +198,11 @@ def random_otp_secret(length: int = 32,
         result = [random.choice(charset).lower() for _ in range(length)]
         
     return ''.join(result)
+
+
+def get_mac_address(split_symbol: str = ":"):
+    mac = uuid.UUID(int = uuid.getnode()).hex[-12:].upper()
+    return f"{split_symbol}".join([mac[e:e+2] for e in range(0, 11, 2)])
 
 
 class VersionMisMatchError(ValueError):
