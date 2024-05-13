@@ -26,6 +26,7 @@ import base64
 import requests
 from pathlib import Path
 from typing import Optional
+from packaging.version import parse
 
 
 def is_type(p):
@@ -203,6 +204,17 @@ def random_otp_secret(length: int = 32,
 def get_mac_address(split_symbol: str = ":"):
     mac = uuid.UUID(int = uuid.getnode()).hex[-12:].upper()
     return f"{split_symbol}".join([mac[e:e+2] for e in range(0, 11, 2)])
+
+
+def is_canonical_version(version):
+    return re.match(r'^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?$', version) is not None
+
+
+def parse_version(version):
+    if not is_canonical_version(version):
+        raise ValueError(f'The version {version} identifier is not in the canonical format')
+    
+    return parse(version)
 
 
 class VersionMisMatchError(ValueError):
