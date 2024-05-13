@@ -74,7 +74,7 @@ Supported platforms:
 ## Installation
 
 ```bash
-pip install mlcbase
+pip install mlcbase -i https://pypi.org/simple/
 ```
 
 ## Getting Started
