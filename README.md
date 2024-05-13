@@ -23,11 +23,7 @@ Supported platforms:
 - MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
 
 <details open>
-<summary>Features (v1.2.0)</summary>
-
-- $\color{blue}{\textbf{update }}$ **Version**
-
-    We define a `Version` class to manage the version of all MuLingCloud modules or applications. The instantiated versions can easily compare their order by using comparision operators, i.e. `==`, `!=`, `<`, `<=`, `>`, `>=`.
+<summary>Features (v1.2.0a1)</summary>
 
 - **Config Dictionary**
 
@@ -71,7 +67,7 @@ Supported platforms:
 
 - $\color{red}{\textbf{BREAKING CHANGE }}$ **HashiCorp Vault**
 
-    We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported secret engines: KV v1, KV v2, TOTP.
+    We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported authorization methods: token, username & password. Supported secret engines: KV v1, KV v2, TOTP, Transit.
 
 </details>
 

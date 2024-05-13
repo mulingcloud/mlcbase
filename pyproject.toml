@@ -4,11 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlcbase"
-version = "1.1.0.rc1"
+version = "1.2.0a1"
 authors = [
     {name = "Weiming Chen", email = "wm_chen@yeah.net"},
-    {name = "Yuanshuang Sun", email = "sunsun5544@126.com"},
-    {name = "Zilin Yang", email = "876497115@qq.com"}
+    {name = "Yuanshuang Sun", email = "sunsun5544@126.com"}
 ]
 description = "The base module of all MuLingCloud modules and applications."
 readme = {"file" = "README.md", content-type = "text/markdown"}
@@ -19,12 +18,15 @@ dependencies = [
     "pytz",
     "prettytable",
     "pyyaml",
-    "xmltodict",
     "rsa",
     "pycryptodome",
+    "requests",
     "paramiko",
     "PyMySQL",
-    "hvac"
+    "pyotp",
+    "qrcode[pil]",
+    "opencv-python",
+    "matplotlib",
 ]
 license = { file = "LICENSE" }
 classifiers = [

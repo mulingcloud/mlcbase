@@ -3,9 +3,12 @@ loguru
 pytz
 prettytable
 pyyaml
-xmltodict
 rsa
 pycryptodome
+requests
 paramiko
 PyMySQL
-hvac
+pyotp
+qrcode[pil]
+opencv-python
+matplotlib
