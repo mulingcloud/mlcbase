@@ -28,6 +28,7 @@ from .vault import (VaultDuration, VaultSecretEngineKV1, VaultSecretEngineKV2, V
 from .database import MySQLAPI, SQLiteAPI
 from .remote_connect import SSH, SFTP
 from .email import SMTPAPI
+from .register import Registry, DATABASE, EMAIL, SECRET, FILEOPT, IMAGEIO, REMOTE
 from .misc import (is_type, is_bytes, is_str, is_int, is_float, is_bool, is_list, is_dict,
                    is_tuple, is_path, is_url, is_base64, random_hex, random_otp_secret, get_mac_address,
                    is_canonical_version, parse_version)
@@ -41,13 +42,13 @@ __all__ = [
     "rsa_decrypt_text", "rsa_sign_text", "rsa_verify_signature", "rsa_encrypt_file", "rsa_decrypt_file", 
     "generate_otp_secret", "generate_otp_code", "verify_otp_code", "VaultDuration", "VaultSecretEngineKV1", 
     "VaultSecretEngineKV2", "VaultSecretEngineTOTP", "VaultSecretEngineTransit", "MySQLAPI", "SQLiteAPI", 
-    "SSH", "SFTP", "SMTPAPI", "is_type", "is_bytes", "is_str", "is_int", "is_float", "is_bool", "is_list", 
-    "is_dict", "is_tuple", "is_path", "is_url", "is_base64", "random_hex", "random_otp_secret", "get_mac_address",
-    "is_canonical_version", "parse_version"
+    "SSH", "SFTP", "SMTPAPI", "Registry", "DATABASE", "EMAIL", "SECRET", "FILEOPT", "IMAGEIO", "REMOTE", "is_type", 
+    "is_bytes", "is_str", "is_int", "is_float", "is_bool", "is_list", "is_dict", "is_tuple", "is_path", "is_url", 
+    "is_base64", "random_hex", "random_otp_secret", "get_mac_address", "is_canonical_version", "parse_version"
 ]
 
 
-__version__ = "1.2.0a1"
+__version__ = "1.2.0a2"
 TYPE_NAME = "module"
 NAME = "mlcbase"
 DESCRIPTION = "The base module of all MuLingCloud modules and applications."

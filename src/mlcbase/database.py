@@ -32,11 +32,13 @@ from prettytable import PrettyTable
 
 from .logger import Logger
 from .conifg import ConfigDict
+from .register import DATABASE
 from .misc import is_int, is_float, is_str, is_list
 
 PathLikeType = Union[str, Path]
 
 
+@DATABASE.register_module()
 class MySQLAPI:
     def __init__(self, 
                  host: str, 
@@ -617,6 +619,7 @@ class MySQLAPI:
         return logger
 
 
+@DATABASE.register_module()
 class SQLiteAPI:
     def __init__(self,
                  db_path: Optional[str] = None,

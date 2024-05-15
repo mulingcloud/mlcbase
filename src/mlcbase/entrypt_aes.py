@@ -23,6 +23,7 @@ from typing import Union, Optional
 from Crypto.Cipher import AES
 
 from .logger import Logger
+from .register import SECRET
 from .misc import is_str, is_bytes
 
 PathLikeType = Union[str, Path]
@@ -40,6 +41,7 @@ def __completion(conent: Union[str, bytes], encoding: str = "utf-8"):
     return conent
 
 
+@SECRET.register_module()
 def aes_encrypt_text(plain_text: str,
                      key: Union[str, bytes],
                      iv: Optional[Union[str, bytes]] = None,
@@ -79,6 +81,7 @@ def aes_encrypt_text(plain_text: str,
     return cipher_text
 
 
+@SECRET.register_module()
 def aes_decrypt_text(cipher_text: bytes,
                      key: Union[str, bytes],
                      iv: Optional[Union[str, bytes]] = None,
@@ -123,6 +126,7 @@ def aes_decrypt_text(cipher_text: bytes,
     return plain_text
 
 
+@SECRET.register_module()
 def aes_entrypt_file(plain_file_path: PathLikeType,
                      crypto_save_path: PathLikeType,
                      key: Union[str, bytes],
@@ -159,6 +163,7 @@ def aes_entrypt_file(plain_file_path: PathLikeType,
         return False
 
 
+@SECRET.register_module()
 def aes_decrypt_file(crypto_file_path: PathLikeType, 
                      plain_save_path: PathLikeType,
                      key: Union[str, bytes],

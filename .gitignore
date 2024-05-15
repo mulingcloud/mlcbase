@@ -1,8 +1,12 @@
 .vscode/
 **/__pycache__/
 backup/
+
+# release
 release/
 release.*
+dist/
+*.egg-info
 
 # all-contributors
 node_modules/

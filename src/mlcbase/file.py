@@ -26,6 +26,7 @@ from typing import Optional, Union
 
 from .conifg import ConfigDict
 from .logger import Logger
+from .register import FILEOPT
 from .misc import is_str, is_int
 
 PathLikeType = Union[str, Path]
@@ -33,6 +34,7 @@ PathLikeType = Union[str, Path]
 __all__ = ["create", "remove", "listdir", "get_file_size", "get_dir_size", "get_meta_info"]
 
 
+@FILEOPT.register_module()
 def create(path: PathLikeType,
            ftype: str = "auto",
            src: Optional[PathLikeType] = None,
@@ -136,6 +138,7 @@ def create(path: PathLikeType,
             return False
         
 
+@FILEOPT.register_module()
 def remove(path: PathLikeType, logger: Optional[Logger] = None):
     path = str(path)
     assert os.path.lexists(path), f'{path} is not exist'
@@ -165,6 +168,7 @@ def remove(path: PathLikeType, logger: Optional[Logger] = None):
         return False
 
 
+@FILEOPT.register_module()
 def listdir(path: PathLikeType, 
             sort_func: Optional[callable] = None,
             reverse: bool = False,
@@ -196,6 +200,7 @@ def listdir(path: PathLikeType,
         return None
 
 
+@FILEOPT.register_module()
 def get_file_size(path: PathLikeType, 
                   return_unit: Optional[str] = None,
                   auto_unit: bool = True,
@@ -257,6 +262,7 @@ def get_file_size(path: PathLikeType,
     return (size, 'B')
 
 
+@FILEOPT.register_module()
 def get_dir_size(path: PathLikeType,
                  return_unit: Optional[str] = None,
                  auto_unit: bool = True,
@@ -324,6 +330,7 @@ def get_dir_size(path: PathLikeType,
     return (total_size, 'B')
     
 
+@FILEOPT.register_module()
 def get_meta_info(path: PathLikeType):
     """get the meta information of file or directory
 

@@ -30,11 +30,13 @@ from PIL import Image
 
 from .logger import Logger
 from .conifg import ConfigDict
+from .register import IMAGEIO
 from .misc import is_url, is_base64
 
 PathLikeType = Union[str, Path]
 
 
+@IMAGEIO.register_module()
 def get_image_from_url(url: str, 
                        save_path: Optional[PathLikeType] = None,
                        return_base64: bool = False,
@@ -106,6 +108,7 @@ def get_image_from_url(url: str,
         raise ValueError(f"Failed to get image from url: {url}")
 
 
+@IMAGEIO.register_module()
 def load_image(path: PathLikeType, 
                backend: str = "cv2", 
                logger: Optional[Logger] = None,
@@ -156,6 +159,7 @@ def load_image(path: PathLikeType,
     return img
 
 
+@IMAGEIO.register_module()
 def save_image(img: Any, 
                path: PathLikeType, 
                backend: str = "cv2", 

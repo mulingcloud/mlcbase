@@ -42,11 +42,13 @@ import pyotp
 from .logger import Logger
 from .conifg import ConfigDict
 from .entrypt_aes import aes_encrypt_text, aes_decrypt_text
+from .register import SECRET
 from .misc import random_hex, is_dict, is_str, is_list, is_int, is_base64
 
 PathLikeType = Union[str, Path]
 
 
+@SECRET.register_module()
 class VaultDuration:
     """This class is used to parse Vault duration string format
 
@@ -243,6 +245,7 @@ class _VaultHTTPAPI:
         return logger
     
 
+@SECRET.register_module()
 class VaultSecretEngineKV1(_VaultHTTPAPI):
     """KV Secret Engine (version 1)
     Refer to https://developer.hashicorp.com/vault/api-docs/secret/kv/kv-v1 for more details.
@@ -469,6 +472,7 @@ class VaultSecretEngineKV1(_VaultHTTPAPI):
         return False
 
 
+@SECRET.register_module()
 class VaultSecretEngineKV2(_VaultHTTPAPI):
     """KV Secret Engine (version 2)
     
@@ -1048,7 +1052,8 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
             
         return False
     
-    
+
+@SECRET.register_module()
 class VaultSecretEngineTOTP(_VaultHTTPAPI):
     """TOTP Secret Engine
     
@@ -1440,7 +1445,7 @@ class VaultSecretEngineTOTP(_VaultHTTPAPI):
         return url
     
 
-# TODO: implement in the future
+@SECRET.register_module()
 class VaultSecretEngineTransit(_VaultHTTPAPI):
     """Transit Secret Engine
 

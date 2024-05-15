@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0a2
+
+#### New Feature
+
+- Add the new feature of `register` module
+
 ## 1.2.0a1
 
 #### New Feature

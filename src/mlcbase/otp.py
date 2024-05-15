@@ -36,6 +36,7 @@ from qrcode.constants import ERROR_CORRECT_L, ERROR_CORRECT_M, ERROR_CORRECT_Q, 
 from .image_io import load_image
 from .conifg import ConfigDict
 from .logger import Logger
+from .register import SECRET
 from .misc import random_otp_secret, is_int, is_url
 
 _OTP_HMAC = {'SHA1': hashlib.sha1,
@@ -45,6 +46,7 @@ _OTP_HMAC = {'SHA1': hashlib.sha1,
 PathLikeType = Union[str, Path]
 
 
+@SECRET.register_module()
 def generate_otp_secret(account_name: str, 
                         method: str = "TOTP",
                         issuer: str = "MuLingCloud",
@@ -186,6 +188,7 @@ def generate_otp_secret(account_name: str,
     return result
 
 
+@SECRET.register_module()
 def generate_otp_code(secret_key: str, 
                       count: Optional[int] = None,
                       method: str = "TOTP",
@@ -234,6 +237,7 @@ def generate_otp_code(secret_key: str,
     return code
 
 
+@SECRET.register_module()
 def verify_otp_code(code: str,
                     secret_key: str,
                     count: Optional[int] = None,

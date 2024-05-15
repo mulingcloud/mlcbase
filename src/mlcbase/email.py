@@ -37,11 +37,13 @@ from .logger import Logger
 from .file import get_file_size
 from .conifg import ConfigDict
 from .remote_connect import SFTP
+from .register import EMAIL
 from .misc import is_str, is_dict, FileTooLargeError, FileUploadError
 
 PathLikeType = Union[str, Path]
 
 
+@EMAIL.register_module()
 class SMTPAPI:
     def __init__(self, 
                  host: str,

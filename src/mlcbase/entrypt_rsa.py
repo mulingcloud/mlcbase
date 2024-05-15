@@ -27,6 +27,7 @@ import rsa
 
 from .logger import Logger
 from .file import get_file_size
+from .register import SECRET
 from .misc import is_list, is_bytes, is_str, is_path, is_int
 
 PathLikeType = Union[str, Path]
@@ -110,6 +111,7 @@ class _DecryptTextThread(Thread):
         self.plain_text = plain_text
 
 
+@SECRET.register_module()
 def create_rsa_keys(public_path: Optional[PathLikeType] = None, 
                     private_path: Optional[PathLikeType] = None, 
                     key_length: int = 2048,
@@ -149,6 +151,7 @@ def create_rsa_keys(public_path: Optional[PathLikeType] = None,
         return None
 
 
+@SECRET.register_module()
 def rsa_encrypt_text(plain_text: Union[str, bytes], 
                      public_key: Union[bytes, PathLikeType], 
                      key_length: int = 2048,
@@ -218,6 +221,7 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
     return cipher_text
 
 
+@SECRET.register_module()
 def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
                      private_key: Union[bytes, PathLikeType],
                      key_length: int = 2048,
@@ -315,6 +319,7 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
     return plain_text
 
 
+@SECRET.register_module()
 def rsa_sign_text(plain_text: str,
                   private_key: Union[bytes, PathLikeType],
                   hash_method: str = "SHA-512",
@@ -346,6 +351,7 @@ def rsa_sign_text(plain_text: str,
     return signed_cipher_text
 
 
+@SECRET.register_module()
 def rsa_verify_signature(plain_text: str,
                          signature: bytes,
                          public_key: Union[bytes, PathLikeType],
@@ -377,6 +383,7 @@ def rsa_verify_signature(plain_text: str,
         return False
 
 
+@SECRET.register_module()
 def rsa_encrypt_file(plain_file_path: PathLikeType, 
                      crypto_save_path: PathLikeType, 
                      public_key: Union[bytes, PathLikeType], 
@@ -465,6 +472,7 @@ def rsa_encrypt_file(plain_file_path: PathLikeType,
         return False
 
 
+@SECRET.register_module()
 def rsa_decrypt_file(crypto_file_path: PathLikeType,
                      plain_save_path: PathLikeType,
                      private_key: Union[bytes, PathLikeType],

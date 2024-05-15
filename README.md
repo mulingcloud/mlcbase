@@ -23,37 +23,41 @@ Supported platforms:
 - MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
 
 <details open>
-<summary>Features (v1.2.0a1)</summary>
+<summary>Features (v1.2.0a2)</summary>
+
+- $\color{red}{\textbf{new }}$ **Register**
+
+    We define a `Registry` to register modules, which allow you to use the module by a config file.
 
 - **Config Dictionary**
 
     We define a `ConfigDict` for more convenience usage. It is a type of dictionary inherited from `dict`. It has all the features of `dict` while including other more convenient features.
 
-- $\color{blue}{\textbf{update }}$ **Logger**
+- **Logger**
 
     We build a `Logger` for more convenience logging management. Actually, this is a slightly improvement based on [loguru](https://github.com/Delgan/loguru). Refer to [pylog](https://github.com/wmchen/pylog) for more information.
 
-- $\color{blue}{\textbf{update }}$ **Runtime Analysis**
+- **Runtime Analysis**
 
     We offer a simple way to evaluate functions in the Python project. All you need is to wrap the target function by a decorator.
 
-- $\color{blue}{\textbf{update }}$ **File Operations**
+- **File Operations**
 
     We offer various features to make file operations easier. Besides, we offer a simple way to load and save JSON, YAML, and XML files.
 
-- $\color{red}{\textbf{new }}$ **Image IO**
+- **Image IO**
 
     We offer a simple way to load and save images.
 
-- $\color{red}{\textbf{new }}$ **One-Time Password**
+- **One-Time Password**
 
     We support two methods for OTP: Time-based One-Time Password (TOTP) and HMAC-based One-Time Password (HOTP).
 
-- $\color{blue}{\textbf{update }}$ **Encryption and Decryption**
+- **Encryption and Decryption**
 
     We offer various methods to encrypt and decrypt or verify text, files and passwords including RSA, AES and Hash.
 
-- $\color{blue}{\textbf{update }}$ **Database**
+- **Database**
 
     We offer a simple way to operate the database. Supported database backend: MySQL, SQLite.
 
@@ -61,11 +65,11 @@ Supported platforms:
 
     We support SSH and SFTP for remote connection.
 
-- $\color{blue}{\textbf{update }}$ **Email**
+- **Email**
 
     We offer a simple API to send email. Currently only supports SMTP (with SSL) server.
 
-- $\color{red}{\textbf{BREAKING CHANGE }}$ **HashiCorp Vault**
+- **HashiCorp Vault**
 
     We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported authorization methods: token, username & password. Supported secret engines: KV v1, KV v2, TOTP, Transit.
 
@@ -74,7 +78,7 @@ Supported platforms:
 ## Installation
 
 ```bash
-pip install mlcbase -i https://pypi.org/simple/
+pip install mlcbase
 ```
 
 ## Getting Started
@@ -115,6 +119,6 @@ This project is released under the [Apache 2.0 license](https://www.apache.org/l
 
 ## Repository
 
-- Github Repository: https://github.com/wmchen/mlcbase
+- Github Repository: https://github.com/mulingcloud/mlcbase
 - GitLab Repository: https://gitlab.com/wm-chen/mlcbase
 - Gitee Repository: https://gitee.com/wm-chen/mlcbase

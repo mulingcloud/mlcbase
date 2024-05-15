@@ -33,11 +33,13 @@ import paramiko
 
 from .logger import Logger
 from .file import listdir, create
+from .register import REMOTE
 from .misc import PlatformNotSupportError
 
 PathLikeType = Union[str, Path]
 
 
+@REMOTE.register_module()
 class SSH:
     def __init__(self,
                  host: str, 
@@ -124,6 +126,7 @@ class SSH:
         return logger
 
 
+@REMOTE.register_module()
 class SFTP:
     def __init__(self,
                  host: str, 

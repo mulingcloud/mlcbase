@@ -30,11 +30,13 @@ import yaml
 
 from .logger import Logger
 from .conifg import ConfigDict
+from .register import FILEOPT
 from .misc import is_dict, is_list, is_int
 
 PathLikeType = Union[str, Path]
 
 
+@FILEOPT.register_module()
 def load_json(path: PathLikeType, logger: Optional[Logger] = None):
     """load json file to a dict
 
@@ -61,6 +63,7 @@ def load_json(path: PathLikeType, logger: Optional[Logger] = None):
         return None
     
 
+@FILEOPT.register_module()
 def save_json(data: Union[list, dict],
               path: PathLikeType,
               ensure_ascii: bool = True,
@@ -94,6 +97,7 @@ def save_json(data: Union[list, dict],
         return False
     
 
+@FILEOPT.register_module()
 def load_yaml(path: PathLikeType, logger: Optional[Logger] = None):
     """load yaml file to a dict
 
@@ -120,6 +124,7 @@ def load_yaml(path: PathLikeType, logger: Optional[Logger] = None):
         return None
     
 
+@FILEOPT.register_module()
 def save_yaml(data: Union[dict, list], 
               path: PathLikeType, 
               allow_unicode: bool = False,
@@ -149,6 +154,7 @@ def save_yaml(data: Union[dict, list],
         return False
 
 
+@FILEOPT.register_module()
 def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
     """load xml file to a dict
 
@@ -228,6 +234,7 @@ def load_xml(path: PathLikeType, logger: Optional[Logger] = None):
         return None
     
 
+@FILEOPT.register_module()
 def save_xml(data: dict, 
              path: PathLikeType, 
              encoding: str = 'utf-8',

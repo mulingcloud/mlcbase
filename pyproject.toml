@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlcbase"
-version = "1.2.0a1"
+version = "1.2.0a2"
 authors = [
     {name = "Weiming Chen", email = "wm_chen@yeah.net"},
     {name = "Yuanshuang Sun", email = "sunsun5544@126.com"}
@@ -39,4 +39,4 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://www.mulingcloud.com"
-Repository = "https://github.com/wmchen/mlcbase.git"
+Repository = "https://github.com/mulingcloud/mlcbase.git"

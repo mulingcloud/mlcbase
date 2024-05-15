@@ -21,6 +21,7 @@ Tester: Weiming Chen
 import hashlib
 from typing import List, Union
 
+from .register import SECRET
 from .misc import is_str, is_list
 
 support_methods = {'MD5': hashlib.md5,
@@ -31,6 +32,7 @@ support_methods = {'MD5': hashlib.md5,
                    'SHA-512': hashlib.sha512}
 
 
+@SECRET.register_module()
 def encrypt_password(password: str, 
                      methods: Union[str, List[str]], 
                      encoding: str = "utf-8"):
@@ -57,6 +59,7 @@ def encrypt_password(password: str,
     return cipher
 
 
+@SECRET.register_module()
 def verify_password(password: str, 
                     cipher: str, 
                     methods: Union[str, List[str]], 
