@@ -37,11 +37,14 @@ PathLikeType = Union[str, Path]
 
 
 @FILEOPT.register_module()
-def load_json(path: PathLikeType, logger: Optional[Logger] = None):
+def load_json(path: PathLikeType, 
+              encoding: Optional[str] = None,
+              logger: Optional[Logger] = None):
     """load json file to a dict
 
     Args:
         path (PathLikeType)
+        encoding (str, optional): Defaults to None.
         logger (Optional[Logger], optional): Defaults to None.
 
     Returns:
@@ -51,7 +54,7 @@ def load_json(path: PathLikeType, logger: Optional[Logger] = None):
     assert Path(path).suffix.lower() == '.json', 'json load error: the suffix must be .json'
 
     try:
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding=encoding) as f:
             data = json.load(f)
         if is_list(data):
             return data
@@ -68,7 +71,8 @@ def save_json(data: Union[list, dict],
               path: PathLikeType,
               ensure_ascii: bool = True,
               indent: Optional[int] = 4,
-              logger: Optional[Logger] = None,):
+              encoding: Optional[str] = None,
+              logger: Optional[Logger] = None):
     """save data to a json file
 
     Args:
@@ -77,6 +81,7 @@ def save_json(data: Union[list, dict],
         ensure_ascii (Optional[bool]): when ensure_ascii=False, allow non-ASCII characters in the file. 
                                        Defaults to True.
         indent (Optional[int]): spaces to use for indentation. Defaults to 4.
+        encoding (str, optional): Defaults to None.
         logger (Optional[Logger]): Defaults to None.
 
     Returns:
@@ -88,7 +93,7 @@ def save_json(data: Union[list, dict],
         assert is_int(indent), 'json save error: the indent must be "int" type'
     
     try:
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding=encoding) as f:
             json.dump(data, f, ensure_ascii=ensure_ascii, indent=indent)
         return True
     except OSError as e:
@@ -98,11 +103,14 @@ def save_json(data: Union[list, dict],
     
 
 @FILEOPT.register_module()
-def load_yaml(path: PathLikeType, logger: Optional[Logger] = None):
+def load_yaml(path: PathLikeType, 
+              encoding: Optional[str] = None,
+              logger: Optional[Logger] = None):
     """load yaml file to a dict
 
     Args:
         path (PathLikeType)
+        encoding (str, optional): Defaults to None.
         logger (Optional[Logger], optional): Defaults to None.
 
     Returns:
@@ -112,7 +120,7 @@ def load_yaml(path: PathLikeType, logger: Optional[Logger] = None):
     assert Path(path).suffix.lower() in [".yml", ".yaml"], 'yaml load error: the suffix must be .yml or .yaml'
 
     try:
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding=encoding) as f:
             data = yaml.load(f, Loader=yaml.SafeLoader)
         if is_list(data):
             return data
@@ -128,6 +136,7 @@ def load_yaml(path: PathLikeType, logger: Optional[Logger] = None):
 def save_yaml(data: Union[dict, list], 
               path: PathLikeType, 
               allow_unicode: bool = False,
+              encoding: Optional[str] = None,
               logger: Optional[Logger] = None):
     """save data to a yaml file
 
@@ -136,6 +145,7 @@ def save_yaml(data: Union[dict, list],
         path (PathLikeType)
         allow_unicode (bool, optional): when allow_unicode=True, allow unicode characters 
                                         in the file. Defaults to False.
+        encoding (str, optional): Defaults to None.
         logger (Optional[Logger], optional): Defaults to None.
 
     Returns:
@@ -145,7 +155,7 @@ def save_yaml(data: Union[dict, list],
     assert Path(path).suffix.lower() in [".yml", ".yaml"], 'yaml save error: the suffix must be .yml or .yaml'
 
     try:
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding=encoding) as f:
             yaml.dump(data, f, Dumper=yaml.SafeDumper, allow_unicode=allow_unicode)
         return True
     except OSError as e:
