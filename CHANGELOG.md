@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0a3
+
+- Will not raise an connection error when failing to connect to database, Change to set `is_connect=False`
+- Add the parameter of `encoding` in `load_json()`, `save_json()`, `load_yaml()`, `save_yaml()` methods
+
 ## 1.2.0a2
 
 #### New Feature
