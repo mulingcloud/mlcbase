@@ -46,7 +46,7 @@ class MySQLAPI:
                  user: str,
                  database: str,
                  password: str,
-                 charset: str = 'utf-8',
+                 charset: str = 'utf8',
                  work_dir: Optional[PathLikeType] = None, 
                  logger: Optional[Logger] = None,
                  quiet: bool = False):
@@ -58,7 +58,7 @@ class MySQLAPI:
             user (str)
             database (str)
             password (str)
-            charset (str, optional): Defaults to 'utf-8'.
+            charset (str, optional): Defaults to 'utf8'.
             work_dir (Optional[PathLikeType], optional): will save the log file to "work_dir/log/" if 
                                                          work_dir is specified. Defaults to None.
             logger (Optional[Logger], optional): Defaults to None.
@@ -81,9 +81,10 @@ class MySQLAPI:
             self.__database = database
             self.__password = password
             self.__charset = charset
+            self.is_connect = True
         except ConnectionError as e:
             self.logger.error(f'database connect error: {str(e)}')
-            raise ConnectionError(f'database connect error: {str(e)}')
+            self.is_connect = False
         
     def ping(self):
         try:
@@ -657,9 +658,10 @@ class SQLiteAPI:
             self.conn = sqlite3.connect(path)
             self.cursor = self.conn.cursor()
             self.logger.success('database connected')
+            self.is_connect = True
         except ConnectionError as e:
             self.logger.error(f'database connect error: {str(e)}')
-            raise ConnectionError(f'database connect error: {str(e)}')
+            self.is_connect = False
         
     def create_table(self,
                      table_name: Optional[str] = None, 
