@@ -72,11 +72,16 @@ class MySQLAPI:
     def __connect(self, host, port, user, database, password, charset):
         self.logger.info('connecting to database...')
         try:
-            self.conn = pymysql.connect(host=host, port=port, user=user, password=password, database=database, charset=charset)
+            self.conn = pymysql.connect(host=host, 
+                                        port=int(port), 
+                                        user=user, 
+                                        password=password, 
+                                        database=database, 
+                                        charset=charset)
             self.cursor = self.conn.cursor()
             self.logger.success('database connected')
             self.__host = host
-            self.__port = port
+            self.__port = int(port)
             self.__user = user
             self.__database = database
             self.__password = password
@@ -122,13 +127,14 @@ class MySQLAPI:
         >>>     table_name="user",
         >>>     table_config=[dict(name="id", dtype="int", not_null=True, primary_key=True, auto_increment=True),
         >>>                   dict(name="name", dtype="varchar(255)", not_null=True),
-        >>>                   dict(name="age", dtype="integer", not_null=True),
+        >>>                   dict(name="age", dtype="int", not_null=True),
         >>>                   dict(name="add_date", dtype="date", not_null=True)]
         >>> )
         Besides, you can create it with sql_command directly:
         >>> create_table(sql_command="CREATE TABLE IF NOT EXISTS user("
         >>>                          "id INT NOT NULL AUTO_INCREMENT,"
-        >>>                          "name VARCHAR(255) NOT NULL,age INT NOT NULL,"
+        >>>                          "name VARCHAR(255) NOT NULL,"
+        >>>                          "age INT NOT NULL,"
         >>>                          "add_date DATE NOT NULL,PRIMARY KEY (id))"
         >>>                          "ENGINE=InnoDB DEFAULT CHARSET=utf8")
 
