@@ -42,7 +42,7 @@ def __completion(conent: Union[str, bytes], encoding: str = "utf-8"):
 
 
 @SECRET.register_module()
-def aes_encrypt_text(plain_text: str,
+def aes_encrypt_text(plain_text: Union[str, bytes],
                      key: Union[str, bytes],
                      iv: Optional[Union[str, bytes]] = None,
                      mode: int = AES.MODE_CBC,
