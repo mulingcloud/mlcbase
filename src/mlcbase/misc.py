@@ -92,6 +92,13 @@ def is_tuple(p):
         return False
 
 
+def is_squence(p):
+    if is_list(p) or is_tuple(p):
+        return True
+    else:
+        return False
+
+
 def is_path(p):
     if isinstance(p, Path):
         return True
