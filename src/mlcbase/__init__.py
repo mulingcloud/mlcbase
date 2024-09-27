@@ -15,6 +15,7 @@
 from .conifg import ConfigDict, is_config_dict
 from .logger import Logger
 from .timer import wrap_module_timer, delete_register_modules, show_register_modules, runtime_analysis
+from .emoji_pbar import EmojiProgressBar
 from .file import create, remove, listdir, get_file_size, get_dir_size, get_meta_info
 from .loading import load_json, save_json, load_yaml, save_yaml, load_xml, save_xml
 from .image_io import get_image_from_url, load_image, save_image
@@ -35,8 +36,8 @@ from .misc import (is_type, is_bytes, is_str, is_int, is_float, is_bool, is_list
 
 __all__ = [
     "Version", "ConfigDict", "is_config_dict", "Logger", "wrap_module_timer", "delete_register_modules", 
-    "runtime_analysis", "show_register_modules", "create", "remove", "listdir", "get_file_size", "get_dir_size", 
-    "get_meta_info", "load_json", "save_json", "load_yaml", "save_yaml", "load_xml", "save_xml", 
+    "runtime_analysis", "show_register_modules", "EmojiProgressBar", "create", "remove", "listdir", "get_file_size", 
+    "get_dir_size", "get_meta_info", "load_json", "save_json", "load_yaml", "save_yaml", "load_xml", "save_xml", 
     "get_image_from_url", "load_image", "save_image", "encrypt_password", "verify_password", "aes_encrypt_text", 
     "aes_decrypt_text", "aes_entrypt_file", "aes_decrypt_file", "create_rsa_keys", "rsa_encrypt_text", 
     "rsa_decrypt_text", "rsa_sign_text", "rsa_verify_signature", "rsa_encrypt_file", "rsa_decrypt_file", 
@@ -48,7 +49,7 @@ __all__ = [
 ]
 
 
-__version__ = "1.2.0a3"
+__version__ = "1.2.1"
 TYPE_NAME = "module"
 NAME = "mlcbase"
 DESCRIPTION = "The base module of all MuLingCloud modules and applications."

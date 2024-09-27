@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.1
+
+#### New Feature
+
+- Add a new feature of the progress bar with emojis status
+- Add a new misc feature: `is_squence()`
+
 ## 1.2.0a3
 
 - Will not raise an connection error when failing to connect to database, Change to set `is_connect=False`

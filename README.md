@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://lychee.weimingchen.net:1130/uploads/original/dc/0e/eae6786c5d68d4a564f8e3f60157.png" width="100%" />
+    <img src="https://github.com/mulingcloud/mlcbase/blob/main/static/logo_horizontal.png?raw=true" width="100%" />
 </div>
 
 <div align="center">
@@ -23,9 +23,9 @@ Supported platforms:
 - MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
 
 <details open>
-<summary>Features (v1.2.0a2)</summary>
+<summary>Features (v1.2.1)</summary>
 
-- $\color{red}{\textbf{new }}$ **Register**
+- **Register**
 
     We define a `Registry` to register modules, which allow you to use the module by a config file.
 
@@ -40,6 +40,10 @@ Supported platforms:
 - **Runtime Analysis**
 
     We offer a simple way to evaluate functions in the Python project. All you need is to wrap the target function by a decorator.
+
+- $\color{red}{\textbf{new }}$ **Emoji Progress Bar**
+
+    We offer a simple progress bar with emoji status. It is based on [rich](https://github.com/Textualize/rich), but with the same usage with [tqdm](https://github.com/tqdm/tqdm).
 
 - **File Operations**
 
