@@ -130,12 +130,14 @@ def load_image(path: PathLikeType,
 
     if Path(path).exists():
         is_local_path = True
-    else:
-        if not is_url(path):
+    elif is_url(path, test_connection=False):
+        if not is_url(path, test_connection=True):
             if logger is not None:
                 logger.error(f"The URL {path} is not accessible.")
             raise ConnectionError(f"The URL {path} is not accessible.")
         is_local_path = False
+    else:
+        raise ValueError(f"Invalid path: {path}, not exists local path or url")
     
     if is_local_path:
         if backend == "cv2":
