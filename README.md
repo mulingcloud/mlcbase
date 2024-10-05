@@ -23,7 +23,7 @@ Supported platforms:
 - MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
 
 <details open>
-<summary>Features (v1.2.1)</summary>
+<summary>Features (v1.2.2)</summary>
 
 - **Register**
 
@@ -41,7 +41,7 @@ Supported platforms:
 
     We offer a simple way to evaluate functions in the Python project. All you need is to wrap the target function by a decorator.
 
-- $\color{red}{\textbf{new }}$ **Emoji Progress Bar**
+- **Emoji Progress Bar**
 
     We offer a simple progress bar with emoji status. It is based on [rich](https://github.com/Textualize/rich), but with the same usage with [tqdm](https://github.com/tqdm/tqdm).
 
@@ -82,7 +82,7 @@ Supported platforms:
 ## Installation
 
 ```bash
-pip install mlcbase
+pip install mlcbase -i https://pypi.org/simple
 ```
 
 ## Getting Started
