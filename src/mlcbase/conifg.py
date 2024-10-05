@@ -18,7 +18,6 @@ MuLingCloud base module: config dictionary
 Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
 """
-from .misc import is_dict
 
 
 class ConfigDict(dict):
@@ -29,7 +28,7 @@ class ConfigDict(dict):
     def __init__(self, *args, **kwargs):
         super(ConfigDict, self).__init__(*args, **kwargs)
         for k, v in self.items():
-            if is_dict(v):
+            if isinstance(v, dict):
                 self[k] = self.__parse_to_config_dict(v)
 
     def __parse_to_config_dict(self, d):
@@ -42,7 +41,7 @@ class ConfigDict(dict):
             ConfigDict
         """
         for k, v in d.items():
-            if is_dict(v):
+            if isinstance(v, dict):
                 d[k] = self.__parse_to_config_dict(v)
         return ConfigDict(d)
 

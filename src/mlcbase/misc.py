@@ -19,14 +19,18 @@ Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
 """
 import re
-import uuid
+import ipaddress
 import warnings
 import random
 import base64
 import requests
+import socket
+import psutil
 from pathlib import Path
 from typing import Optional
 from packaging.version import parse
+from .conifg import ConfigDict
+from .logger import Logger
 
 
 def is_type(p):
@@ -208,9 +212,39 @@ def random_otp_secret(length: int = 32,
     return ''.join(result)
 
 
-def get_mac_address(split_symbol: str = ":"):
-    mac = uuid.UUID(int = uuid.getnode()).hex[-12:].upper()
-    return f"{split_symbol}".join([mac[e:e+2] for e in range(0, 11, 2)])
+def get_net_info(name: Optional[str] = None, logger: Optional[Logger] = None):
+    try:
+        hostname = socket.gethostname()
+        net_info = ConfigDict(hostname=hostname)
+        if name is None:
+            ip_addr = ipaddress.ip_address(socket.gethostbyname(hostname))
+            for k, v in psutil.net_if_addrs().items():
+                for addr in v:
+                    if addr.address == ip_addr.compressed:
+                        name = k
+                        break
+                if name is not None:
+                    break
+        addr_info = psutil.net_if_addrs()[name]
+        for addr in addr_info:
+            if addr.family == psutil.AF_LINK:
+                net_info.mac = addr.address
+            else:
+                ip = ipaddress.ip_address(addr.address)
+                if ip.version == 4:
+                    net_info.ip = ip.compressed
+                elif ip.version == 6:
+                    if ip.is_global:
+                        net_info.ipv6 = ip.compressed
+                    if ip.is_private:
+                        net_info.ipv6_private = ip.compressed
+        return net_info
+    except Exception as e:
+        if logger is not None:
+            logger.error(f"Failed to get network info: {str(e)}")
+        else:
+            print(f"Failed to get network info: {str(e)}")
+        return None
 
 
 def is_canonical_version(version):

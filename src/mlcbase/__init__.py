@@ -31,7 +31,7 @@ from .remote_connect import SSH, SFTP
 from .email import SMTPAPI
 from .register import Registry, DATABASE, EMAIL, SECRET, FILEOPT, IMAGEIO, REMOTE
 from .misc import (is_type, is_bytes, is_str, is_int, is_float, is_bool, is_list, is_dict,
-                   is_tuple, is_path, is_url, is_base64, random_hex, random_otp_secret, get_mac_address,
+                   is_tuple, is_path, is_url, is_base64, random_hex, random_otp_secret, get_net_info,
                    is_canonical_version, parse_version)
 
 __all__ = [
@@ -45,7 +45,7 @@ __all__ = [
     "VaultSecretEngineKV2", "VaultSecretEngineTOTP", "VaultSecretEngineTransit", "MySQLAPI", "SQLiteAPI", 
     "SSH", "SFTP", "SMTPAPI", "Registry", "DATABASE", "EMAIL", "SECRET", "FILEOPT", "IMAGEIO", "REMOTE", "is_type", 
     "is_bytes", "is_str", "is_int", "is_float", "is_bool", "is_list", "is_dict", "is_tuple", "is_path", "is_url", 
-    "is_base64", "random_hex", "random_otp_secret", "get_mac_address", "is_canonical_version", "parse_version"
+    "is_base64", "random_hex", "random_otp_secret", "get_net_info", "is_canonical_version", "parse_version"
 ]
 
 
