@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.3
+
+### Small Change
+
+- Refactor `EmojiProgressBar`, which would not depend on the `rich` library anymore.
+
 ## 1.2.2
 
 ### New Feature

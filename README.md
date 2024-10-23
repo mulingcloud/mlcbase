@@ -43,7 +43,7 @@ Supported platforms:
 
 - **Emoji Progress Bar**
 
-    We offer a simple progress bar with emoji status. It is based on [rich](https://github.com/Textualize/rich), but with the same usage with [tqdm](https://github.com/tqdm/tqdm).
+    We offer a simple progress bar with emoji status, which has the same usage with [tqdm](https://github.com/tqdm/tqdm).
 
 - **File Operations**
 
