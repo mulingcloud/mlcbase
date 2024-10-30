@@ -23,7 +23,7 @@ Supported platforms:
 - MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
 
 <details open>
-<summary>Features (v1.2.2)</summary>
+<summary>Features (v1.2.4)</summary>
 
 - **Register**
 
@@ -47,7 +47,7 @@ Supported platforms:
 
 - **File Operations**
 
-    We offer various features to make file operations easier. Besides, we offer a simple way to load and save JSON, YAML, and XML files.
+    We offer various features to make file operations easier. Besides, we offer a simple way to load and save JSON, YAML, XML and TOML files.
 
 - **Image IO**
 
@@ -125,4 +125,4 @@ This project is released under the [Apache 2.0 license](https://www.apache.org/l
 
 - Github Repository: https://github.com/mulingcloud/mlcbase
 - GitLab Repository: https://gitlab.com/wm-chen/mlcbase
-- Gitee Repository: https://gitee.com/wm-chen/mlcbase
+- Gitee Repository: https://gitee.com/mulingcloud/mlcbase

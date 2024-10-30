@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.4
+
+### New Feature
+
+- Add the new feature of loading and saving `TOML` files.
+- Support non-SSL connection to SMTP server.
+- Support NOOP for SMTP email server.
+
+### Small Change
+
+- Delete path existence check in `SQLiteAPI`.
+- Use `rich` to render the table instead of `prettytable`.
+
+### Fix Bug
+
+- Modify the logo url address in `generate_otp_secret()`
+
 ## 1.2.3
 
 ### Small Change
