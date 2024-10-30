@@ -15,7 +15,7 @@
 """
 MuLingCloud base module: email api
 
-Support email server: SMTP (SSL)
+Support email server: SMTP
 
 Author: Weiming Chen
 Tester: Weiming Chen, Yuanshaung Sun
@@ -53,6 +53,7 @@ class SMTPAPI:
                  password: str,
                  timeout: int = 30,
                  chunk_size: int = 30,  # MB
+                 use_ssl: bool = True,
                  work_dir: Optional[PathLikeType] = None, 
                  logger: Optional[Logger] = None,
                  quiet: bool = False):
@@ -68,6 +69,7 @@ class SMTPAPI:
             chunk_size (int, optional): large attachment chunk size. if large than the chunk_size, 
                                         the large attachment will upload to the remote sever rather 
                                         than attaching to the email message. Defaults to 30 (MB).
+            use_ssl (bool): whether to use ssl. Defaults to True.
             work_dir (Optional[PathLikeType], optional): will save the log file to "work_dir/log/" if 
                                                          work_dir is specified. Defaults to None.
             logger (Optional[Logger], optional): Defaults to None.
@@ -80,12 +82,16 @@ class SMTPAPI:
         self.__name = name
         self.__address = address
         self.__chunk_size = chunk_size
+        self.__use_ssl = use_ssl
         self.__email_server = self.__connect(host, port, address, password, timeout)
     
     def __connect(self, host, port, address, password, timeout):
         self.logger.info(f"connecting to email server...")
         try:
-            email_server = smtplib.SMTP_SSL(host=host, port=port, timeout=timeout)
+            if self.__use_ssl:
+                email_server = smtplib.SMTP_SSL(host=host, port=port, timeout=timeout)
+            else:
+                email_server = smtplib.SMTP(host=host, port=port, timeout=timeout)
             email_server.login(user=address, password=password)
             self.logger.success(f"email server connected")
             return email_server
@@ -235,6 +241,9 @@ class SMTPAPI:
                 return False
         
         return True
+    
+    def noop(self):
+        self.__email_server.noop()
             
     def close(self):
         if self.__email_server is not None:
