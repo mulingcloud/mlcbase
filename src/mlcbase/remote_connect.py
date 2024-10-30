@@ -133,7 +133,6 @@ class SFTP:
                  port: int,
                  user: str,
                  password: str,
-                 timeout: int = 30,
                  work_dir: Optional[PathLikeType] = None, 
                  logger: Optional[Logger] = None,
                  quiet: bool = False):
@@ -144,7 +143,6 @@ class SFTP:
             port (int)
             user (str)
             password (str)
-            timeout (int, optional): Defaults to 30 seconds.
             work_dir (Optional[PathLikeType], optional): will save the log file to "work_dir/log/" if 
                                                          work_dir is specified. Defaults to None.
             logger (Optional[Logger], optional): Defaults to None.
@@ -155,17 +153,16 @@ class SFTP:
         
         self.support_remote_platform = ["windows", "linux"]
 
-        self.__client = self.__connect(host, port, user, password, timeout)
+        self.__client = self.__connect(host, port, user, password)
         
-    def __connect(self, host, port, user, password, timeout):
+    def __connect(self, host, port, user, password):
         self.logger.info('sftp connecting to remote server...')
-        ssh_client = paramiko.SSHClient()
-        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            ssh_client.connect(host, port, user, password, timeout=timeout)
-            sftp_client = paramiko.SFTPClient.from_transport(ssh_client.get_transport())
+            transport = paramiko.Transport((host, port))
+            transport.connect(username=user, password=password)
+            sftp_client = paramiko.SFTPClient.from_transport(transport)
             self.logger.success('sftp connected to remote server.')
-            return (sftp_client, ssh_client)
+            return sftp_client
         except paramiko.SSHException as e:
             self.logger.error(f"sftp connect error: {str(e)}")
             return None
@@ -206,7 +203,7 @@ class SFTP:
         
         self.logger.info(f'uploading file: [LOCAL] {local_path} -> [REMOTE] {remote_path}')
         try:
-            self.__client[0].put(local_path, remote_path, callback=callback)
+            self.__client.put(local_path, remote_path, callback=callback)
             self.logger.success(f'file uploaded')
             return True
         except paramiko.SFTPError as e:
@@ -249,7 +246,7 @@ class SFTP:
         
         self.logger.info(f'downloading file: [REMOTE] {remote_path} -> [LOCAL] {local_path}')
         try:
-            self.__client[0].get(remote_path, local_path, callback=callback)
+            self.__client.get(remote_path, local_path, callback=callback)
             self.logger.success(f'file downloaded')
             return True
         except paramiko.SFTPError as e:
@@ -403,7 +400,7 @@ class SFTP:
         remote_path = self.__format_path(remote_path, remote_platform)
         
         try:
-            self.__client[0].stat(remote_path)
+            self.__client.stat(remote_path)
             return True
         except:
             return False
@@ -435,7 +432,7 @@ class SFTP:
         remote_path = self.__format_path(remote_path, remote_platform)
         
         try:
-            self.__client[0].listdir(remote_path)
+            self.__client.listdir(remote_path)
             return False
         except:
             return True
@@ -468,7 +465,7 @@ class SFTP:
         remote_path = self.__format_path(remote_path, remote_platform)
         
         try:
-            self.__client[0].listdir(remote_path)
+            self.__client.listdir(remote_path)
             return True
         except:
             return False
@@ -507,7 +504,7 @@ class SFTP:
         if exist_ok:
             if not self.remote_exists(remote_path, remote_platform):
                 try:
-                    self.__client[0].mkdir(remote_path)
+                    self.__client.mkdir(remote_path)
                     status = True
                 except paramiko.SFTPError as e:
                     self.logger.error(f'failed to create directory: {str(e)}')
@@ -516,7 +513,7 @@ class SFTP:
                 status = True
         else:
             try:
-                self.__client[0].mkdir(remote_path)
+                self.__client.mkdir(remote_path)
                 status = True
             except paramiko.SFTPError as e:
                 self.logger.error(f'failed to create directory: {str(e)}')
@@ -558,7 +555,7 @@ class SFTP:
         remote_path = self.__format_path(remote_path, remote_platform)
         
         try:
-            content = self.__client[0].listdir(remote_path)
+            content = self.__client.listdir(remote_path)
             if return_path:
                 content = [self.__format_path(os.path.join(remote_path, f), remote_platform) for f in content]
             return content
@@ -568,8 +565,7 @@ class SFTP:
 
     def close(self):
         if self.__client is not None:
-            self.__client[0].close()  # sftp client
-            self.__client[1].close()  # ssh client
+            self.__client.close()  # sftp client
             self.logger.info('sftp connection closed')
         
     @staticmethod
