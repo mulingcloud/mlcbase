@@ -22,7 +22,8 @@ from functools import wraps
 from datetime import datetime
 from typing import Callable
 
-from prettytable import PrettyTable
+from rich.console import Console
+from rich.table import Table
 
 from .misc import is_str
 
@@ -85,6 +86,8 @@ def runtime_analysis(start_time: datetime = None,
     assert end_time is None or isinstance(end_time, datetime), "end_time must be a datetime object"
     assert is_str(unit) and unit.lower() in ["h", "min", "s", "ms", "us"], \
         "the unit must be one of ['h', 'min', 's', 'ms', 'us']"
+    
+    console = Console()
 
     module_list = list()
     for name, vaule in _register_modules.items():
@@ -94,6 +97,7 @@ def runtime_analysis(start_time: datetime = None,
     module_list.sort(key=lambda x: x['elapsed'], reverse=True)
 
     unit = unit.lower()
+    table = Table(title="Runtime Analysis", show_header=True, show_lines=True)
     if start_time is not None or end_time is not None:
         total_runtime = int((end_time - start_time).total_seconds() * 10**6)
         if unit == "h":
@@ -112,7 +116,12 @@ def runtime_analysis(start_time: datetime = None,
         else:
             print(f'Total runtime: {print_total_runtime:.3f} {unit}')
 
-        table = PrettyTable(["index", "module", f"elapsed ({unit})", "calls", f"avg_runtime ({unit})", "percentage (%)"])
+        table.add_column("index", justify="center")
+        table.add_column("module", justify="center")
+        table.add_column(f"elapsed ({unit})", justify="center")
+        table.add_column("calls", justify="center")
+        table.add_column(f"avg_runtime ({unit})", justify="center")
+        table.add_column("percentage (%)", justify="center")
         for i, m in enumerate(module_list):
             avg_runtime = m['elapsed'] / m['calls']
             percentage = m['elapsed'] / total_runtime * 100
@@ -133,12 +142,16 @@ def runtime_analysis(start_time: datetime = None,
                 print_avg_runtime = avg_runtime
             
             if unit == "us":
-                table.add_row([str(i+1), m["name"], str(print_elapsed), str(m["calls"]), str(print_avg_runtime), f'{percentage:.2f}'])
+                data = [str(i+1), m["name"], str(print_elapsed), str(m["calls"]), str(print_avg_runtime), f'{percentage:.2f}']
             else:
-                table.add_row([str(i+1), m["name"], f"{print_elapsed:.3f}", str(m["calls"]), f"{print_avg_runtime:.3f}", f'{percentage:.2f}'])
-        print(table)
+                data = [str(i+1), m["name"], f"{print_elapsed:.3f}", str(m["calls"]), f"{print_avg_runtime:.3f}", f'{percentage:.2f}']
+            table.add_row(*data)
     else:
-        table = PrettyTable(["index", "module", f"elapsed ({unit})", "calls", f"avg_runtime ({unit})"])
+        table.add_column("index", justify="center")
+        table.add_column("module", justify="center")
+        table.add_column(f"elapsed ({unit})", justify="center")
+        table.add_column("calls", justify="center")
+        table.add_column(f"avg_runtime ({unit})", justify="center")
         for i, m in enumerate(module_list):
             avg_runtime = m['elapsed'] / m['calls']
             if unit == "s":
@@ -152,7 +165,8 @@ def runtime_analysis(start_time: datetime = None,
                 print_avg_runtime = avg_runtime
             
             if unit == "us":
-                table.add_row([str(i+1), m["name"], str(print_elapsed), str(m["calls"]), str(print_avg_runtime)])
+                data = [str(i+1), m["name"], str(print_elapsed), str(m["calls"]), str(print_avg_runtime)]
             else:
-                table.add_row([str(i+1), m["name"], f"{print_elapsed:.3f}", str(m["calls"]), f"{print_avg_runtime:.3f}"])
-        print(table)
+                data = [str(i+1), m["name"], f"{print_elapsed:.3f}", str(m["calls"]), f"{print_avg_runtime:.3f}"]
+            table.add_row(*data)
+    console.print(table)

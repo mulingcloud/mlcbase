@@ -28,7 +28,8 @@ from datetime import datetime
 from typing import Optional, Union, List
 
 import pymysql
-from prettytable import PrettyTable
+from rich.console import Console
+from rich.table import Table
 
 from .logger import Logger
 from .conifg import ConfigDict
@@ -66,6 +67,7 @@ class MySQLAPI:
         """
         self.work_dir = Path(work_dir) if work_dir is not None else None
         self.logger = self._set_logger(logger, quiet)
+        self._console = Console()
 
         self.__connect(host, port, user, database, password, charset)
 
@@ -274,10 +276,11 @@ class MySQLAPI:
             data = self.cursor.fetchall()
             self.conn.commit()
             if show:
-                table = PrettyTable(["Tables"])
+                table = Table(title="Show Data Tables", show_header=True, show_lines=True)
+                table.add_column("Tables", justify="center")
                 for item in data:
-                    table.add_row(item)
-                print(table)
+                    table.add_row(item[0])
+                self._console.print(table)
             return data
         except Exception as error:
             self.logger.error(f'get tables error: {str(error)}')
@@ -314,10 +317,16 @@ class MySQLAPI:
             data = self.cursor.fetchall()
             self.conn.commit()
             if show:
-                table = PrettyTable(["Field", "Type", "Null", "Key", "Default", "Extra"])
+                table = Table(title=f"Show Fields of '{table_name}'", show_header=True, show_lines=True)
+                table.add_column("Field", justify="center")
+                table.add_column("Type", justify="center")
+                table.add_column("Null", justify="center")
+                table.add_column("Key", justify="center")
+                table.add_column("Default", justify="center")
+                table.add_column("Extra", justify="center")
                 for item in data:
-                    table.add_row(item)
-                print(table)
+                    table.add_row(*item)
+                self._console.print(table)
             return data
         except Exception as error:
             self.logger.error(f'get fields error: {str(error)}')
@@ -479,10 +488,13 @@ class MySQLAPI:
             self.conn.commit()
             if show and sql_command is None:
                 fields = fields.split(",")
-                table = PrettyTable(fields)
+                table = Table(title=f"Show Data in '{table_name}'", show_header=True, show_lines=True)
+                for field in fields:
+                    table.add_column(field, justify="center")
                 for item in data:
-                    table.add_row(item)
-                print(table)
+                    item = [str(i) for i in item]
+                    table.add_row(*item)
+                self._console.print(table)
             return data
         except Exception as error:
             self.logger.error(f'search data error: {str(error)}')
@@ -642,15 +654,13 @@ class SQLiteAPI:
             raise ValueError('db_path or in_memory must be provided')
 
         if db_path is not None:
-            if not Path(db_path).exists():
-                self.logger.error(f'No such file: {db_path}')
-                raise FileNotFoundError(f'No such file: {db_path}')
             if Path(db_path).suffix not in [".db", ".db3", ".sqlite", ".sqlite3"]:
                 self.logger.error(f'Unsupported suffix: {Path(db_path).suffix}')
                 raise ValueError(f'Unsupported suffix: {Path(db_path).suffix}')
         
         self.db_path = db_path
         self.in_memory = in_memory
+        self._console = Console()
 
         self.__connect()
 
@@ -668,6 +678,9 @@ class SQLiteAPI:
         except ConnectionError as e:
             self.logger.error(f'database connect error: {str(e)}')
             self.is_connect = False
+
+    def ping(self):
+        pass
         
     def create_table(self,
                      table_name: Optional[str] = None, 
@@ -835,10 +848,11 @@ class SQLiteAPI:
             if not return_sqlite_sequence:
                 data = tuple(filter(lambda x: x[0] != "sqlite_sequence", data))
             if show:
-                table = PrettyTable(["Tables"])
+                table = Table(title="Show Data Tables", show_header=True, show_lines=True)
+                table.add_column("Tables", justify="center")
                 for item in data:
-                    table.add_row(item)
-                print(table)
+                    table.add_row(item[0])
+                self._console.print(table)
             return tuple(data)
         except Exception as error:
             self.logger.error(f'get tables error: {str(error)}')
@@ -872,10 +886,17 @@ class SQLiteAPI:
             data = self.cursor.fetchall()
             self.conn.commit()
             if show:
-                table = PrettyTable(["Column", "Field", "Type", "Not Null", "Default", "Primary Key"])
+                table = Table(title=f"Show Fields of '{table_name}'", show_header=True, show_lines=True)
+                table.add_column("Column", justify="center")
+                table.add_column("Field", justify="center")
+                table.add_column("Type", justify="center")
+                table.add_column("Not Null", justify="center")
+                table.add_column("Default", justify="center")
+                table.add_column("Primary Key", justify="center")
                 for item in data:
-                    table.add_row(item)
-                print(table)
+                    item = [str(i) for i in item]
+                    table.add_row(*item)
+                self._console.print(table)
             return tuple(data)
         except Exception as error:
             self.logger.error(f'get fields error: {str(error)}')
@@ -976,10 +997,13 @@ class SQLiteAPI:
             self.conn.commit()
             if show and sql_command is None:
                 fields = fields.split(",")
-                table = PrettyTable(fields)
+                table = Table(title=f"Show Data in '{table_name}'", show_header=True, show_lines=True)
+                for field in fields:
+                    table.add_column(field, justify="center")
                 for item in data:
-                    table.add_row(item)
-                print(table)
+                    item = [str(i) for i in item]
+                    table.add_row(*item)
+                self._console.print(table)
             return tuple(data)
         except Exception as error:
             self.logger.error(f'search data error: {str(error)}')
