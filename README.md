@@ -23,7 +23,7 @@ Supported platforms:
 - MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
 
 <details open>
-<summary>Features (v1.2.4)</summary>
+<summary>Features (v1.2.5)</summary>
 
 - **Register**
 

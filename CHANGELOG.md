@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.5
+
+### Small Change
+
+- Would not establish SSH connection when creating an SFTP connection.
+- Offer a default transferring progress bar for SFTP operations.
+
 ## 1.2.4
 
 ### New Feature
