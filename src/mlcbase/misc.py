@@ -170,9 +170,9 @@ def random_hex(length: int, seed: Optional[int] = None, uppercase: bool = True):
     
     charset = "0123456789ABCDEF"
     if uppercase:
-        result = [random.choice(charset) for _ in range(length)]
+        result = random.choices(charset, k=length)
     else:
-        result = [random.choice(charset).lower() for _ in range(length)]
+        result = random.choices(charset.lower(), k=length)
         
     return ''.join(result)
 
