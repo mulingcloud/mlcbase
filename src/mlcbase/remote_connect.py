@@ -33,6 +33,7 @@ import paramiko
 
 from .logger import Logger
 from .file import listdir, create
+from .emoji_pbar import EmojiProgressBar
 from .register import REMOTE
 from .misc import PlatformNotSupportError
 
@@ -154,6 +155,7 @@ class SFTP:
         self.support_remote_platform = ["windows", "linux"]
 
         self.__client = self.__connect(host, port, user, password)
+        self.__pbar = None
         
     def __connect(self, host, port, user, password):
         self.logger.info('sftp connecting to remote server...')
@@ -203,6 +205,8 @@ class SFTP:
         
         self.logger.info(f'uploading file: [LOCAL] {local_path} -> [REMOTE] {remote_path}')
         try:
+            if callback is None:
+                callback = self.transfer_progress
             self.__client.put(local_path, remote_path, callback=callback)
             self.logger.success(f'file uploaded')
             return True
@@ -246,6 +250,8 @@ class SFTP:
         
         self.logger.info(f'downloading file: [REMOTE] {remote_path} -> [LOCAL] {local_path}')
         try:
+            if callback is None:
+                callback = self.transfer_progress
             self.__client.get(remote_path, local_path, callback=callback)
             self.logger.success(f'file downloaded')
             return True
@@ -562,6 +568,15 @@ class SFTP:
         except paramiko.SFTPError as e:
             self.logger.error(f'failed to list directory: {str(e)}')
             return None
+        
+    def transfer_progress(self, transferred: int, total: int):
+        if self.__pbar is None:
+            self.__pbar = EmojiProgressBar(total=total, desc="Transferring")
+        self.__pbar.completed = transferred
+        self.__pbar.update(0)
+        if transferred == total:
+            self.__pbar.close()
+            self.__pbar = None
 
     def close(self):
         if self.__client is not None:
