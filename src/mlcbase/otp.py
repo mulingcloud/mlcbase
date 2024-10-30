@@ -151,7 +151,7 @@ def generate_otp_secret(account_name: str,
         if has_logo:
             if qr_config.logo is None:
                 # default to use MuLingCloud logo
-                qr_config.logo = "https://lychee.weimingchen.net:1130/uploads/original/a6/91/079d600754e4912a218941054741.png"
+                qr_config.logo = "https://lychee.weimingchen.net:666/uploads/original/a6/91/079d600754e4912a218941054741.png"
             else:
                 if not Path(qr_config.logo).exists():
                     if not is_url(qr_config.logo):
