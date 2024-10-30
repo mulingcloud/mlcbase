@@ -27,6 +27,7 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
 
 import yaml
+import toml
 
 from .logger import Logger
 from .conifg import ConfigDict
@@ -330,4 +331,54 @@ def save_xml(data: dict,
     except OSError as e:
         if logger is not None:
             logger.error(f'xml save error: {str(e)}')
+        return False
+
+
+@FILEOPT.register_module()
+def load_toml(path: PathLikeType, 
+              logger: Optional[Logger] = None):
+    """load toml file to a dict
+
+    Args:
+        path (PathLikeType)
+        logger (Optional[Logger], optional): Defaults to None.
+
+    Returns:
+        ConfigDict or None: return a ConfigDict if success, return None if fail
+    """
+    assert Path(path).exists(), 'toml load error: the file is not exist'
+    assert Path(path).suffix.lower() == '.toml', 'json load error: the suffix must be .toml'
+
+    try:
+        data = toml.load(path)
+        return ConfigDict(data)
+    except OSError as e:
+        if logger is not None:
+            logger.error(f'toml load error: {str(e)}')
+        return None
+
+
+@FILEOPT.register_module()
+def save_toml(data: dict,
+              path: PathLikeType,
+              logger: Optional[Logger] = None):
+    """save data to a toml file
+
+    Args:
+        data (dict)
+        path (PathLikeType)
+        logger (Optional[Logger], optional): Defaults to None.
+    
+    Returns:
+        bool: return True if success, return False if fail
+    """
+    assert is_dict(data), 'toml save error: the saving data must be "dict" type'
+    assert Path(path).suffix.lower() == ".toml", 'toml save error: the suffix must be .toml'
+    try:
+        with open(path, 'w', encoding="utf-8") as f:
+            toml.dump(data, f)
+        return True
+    except OSError as e:
+        if logger is not None:
+            logger.error(f'toml save error: {str(e)}')
         return False
