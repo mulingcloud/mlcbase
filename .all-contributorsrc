@@ -1,10 +1,11 @@
 {
   "projectName": "mlcbase",
-  "projectOwner": "wmchen",
+  "projectOwner": "mulingcloud",
   "repoType": "github",
   "repoHost": "https://github.com",
   "files": [
-    "README.md", "tutorial.ipynb"
+    "README.md",
+    "tutorial.ipynb"
   ],
   "imageSize": 100,
   "commit": true,
@@ -33,8 +34,18 @@
         "test",
         "tutorial"
       ]
+    },
+    {
+      "login": "MHM5000",
+      "name": "Mohammad Hossein Mojtahedi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2694949?v=4",
+      "profile": "http://mojtahedi.info",
+      "contributions": [
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "linkToUsage": true
+  "linkToUsage": true,
+  "commitType": "docs"
 }

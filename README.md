@@ -105,10 +105,20 @@ We welcome all contributors, feel free to create an issue or file a pull request
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://weimingchen.net/"><img src="https://avatars.githubusercontent.com/u/33000375?v=4?s=100" width="100px;" alt="Weiming Chen"/><br /><sub><b>Weiming Chen</b></sub></a><br /><a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Code">💻</a> <a href="#ideas-wmchen" title="Ideas, Planning, & Feedback">🤔</a> <a href="#projectManagement-wmchen" title="Project Management">📆</a> <a href="https://github.com/wmchen/mlcbase/commits?author=wmchen" title="Tests">⚠️</a> <a href="#tutorial-wmchen" title="Tutorials">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://www.mulingcloud.com/author/yuanshuang-sun/"><img src="https://avatars.githubusercontent.com/u/32105419?v=4?s=100" width="100px;" alt="Yuanshuang Sun"/><br /><sub><b>Yuanshuang Sun</b></sub></a><br /><a href="#ideas-dcsasori" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/wmchen/mlcbase/commits?author=dcsasori" title="Tests">⚠️</a> <a href="#tutorial-dcsasori" title="Tutorials">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://weimingchen.net/"><img src="https://avatars.githubusercontent.com/u/33000375?v=4?s=100" width="100px;" alt="Weiming Chen"/><br /><sub><b>Weiming Chen</b></sub></a><br /><a href="https://github.com/mulingcloud/mlcbase/commits?author=wmchen" title="Code">💻</a> <a href="#ideas-wmchen" title="Ideas, Planning, & Feedback">🤔</a> <a href="#projectManagement-wmchen" title="Project Management">📆</a> <a href="https://github.com/mulingcloud/mlcbase/commits?author=wmchen" title="Tests">⚠️</a> <a href="#tutorial-wmchen" title="Tutorials">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.mulingcloud.com/author/yuanshuang-sun/"><img src="https://avatars.githubusercontent.com/u/32105419?v=4?s=100" width="100px;" alt="Yuanshuang Sun"/><br /><sub><b>Yuanshuang Sun</b></sub></a><br /><a href="#ideas-dcsasori" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/mulingcloud/mlcbase/commits?author=dcsasori" title="Tests">⚠️</a> <a href="#tutorial-dcsasori" title="Tutorials">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://mojtahedi.info"><img src="https://avatars.githubusercontent.com/u/2694949?v=4?s=100" width="100px;" alt="Mohammad Hossein Mojtahedi"/><br /><sub><b>Mohammad Hossein Mojtahedi</b></sub></a><br /><a href="https://github.com/mulingcloud/mlcbase/commits?author=MHM5000" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
+  <tfoot>
+    <tr>
+      <td align="center" size="13px" colspan="7">
+        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
+          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
+        </img>
+      </td>
+    </tr>
+  </tfoot>
 </table>
 
 <!-- markdownlint-restore -->
