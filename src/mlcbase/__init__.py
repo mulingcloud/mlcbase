@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 from .conifg import ConfigDict, is_config_dict
 from .logger import Logger
 from .timer import wrap_module_timer, delete_register_modules, show_register_modules, runtime_analysis
@@ -99,5 +104,6 @@ DESCRIPTION = "The base module of all MuLingCloud modules and applications."
 if not hasattr(__import__(NAME), NAME):
     from colorama import Fore
     
-    hello_msg = f"\n👋 {Fore.BLUE}Welcome to use {Fore.RED}MuLingCloud{Fore.BLUE}. We aim to let everything easier.{Fore.BLUE}\n\n📍 {Fore.YELLOW}{NAME} ({__version__}) imported{Fore.RESET}\n"
-    print(hello_msg.encode("utf-8").decode("utf-8"))
+    print(f"\n👋 {Fore.BLUE}Welcome to use {Fore.RED}MuLingCloud{Fore.BLUE}. "
+          f"We aim to let everything easier.{Fore.BLUE}\n\n"
+          f"📍 {Fore.YELLOW}{NAME} ({__version__}) imported{Fore.RESET}\n")
