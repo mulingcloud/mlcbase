@@ -21,4 +21,4 @@ jobs:
       - name: Test ConfigDict
         run: python test_scripts/config.py
       - name: Test Database
-        run: python test_scripts/database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }}
+        run: python test_scripts/database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}

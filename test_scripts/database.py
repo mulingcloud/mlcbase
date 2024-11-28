@@ -17,6 +17,7 @@ def parse_args():
     parser.add_argument("--user", required=True)
     parser.add_argument("--password", required=True)
     parser.add_argument("--database", required=True)
+    parser.add_argument("--python_version", required=True)
     parser.add_argument("--charset", default="utf8")
 
     args = parser.parse_args()
@@ -25,6 +26,7 @@ def parse_args():
 
 def run():
     args = parse_args()
+    table_name = f"user_{''.join(args.python_version.split('.'))}"
 
     logger = Logger()
     logger.init_logger()
@@ -41,7 +43,7 @@ def run():
     
     # create table
     status = db_api.create_table(
-        table_name="user", 
+        table_name=table_name, 
         table_config=[dict(name="id", dtype="int", not_null=True, primary_key=True, auto_increment=True),
                       dict(name="name", dtype="varchar(255)", not_null=True),
                       dict(name="age", dtype="integer", not_null=True),
@@ -56,7 +58,7 @@ def run():
         raise RuntimeError("MySQL test failed.")
     
     # get fields
-    if db_api.get_fields(table_name="user", show=True) is None:
+    if db_api.get_fields(table_name=table_name, show=True) is None:
         raise RuntimeError("MySQL test failed.")
     
     # insert data
@@ -65,37 +67,37 @@ def run():
                  dict(name="David", age=45, add_date=datetime.now().strftime("%Y-%m-%d")),
                  dict(name="Peter", age=35)]
     for data in user_data:
-        if not db_api.insert_data(table_name="user", data=data):
+        if not db_api.insert_data(table_name=table_name, data=data):
             raise RuntimeError("MySQL test failed.")
     
     # search data
     logger.info("Case 1: only return the field of 'name', and the condition is searching the users with age range from 18 to 30")
-    data = db_api.search_data(table_name="user", fields="name", condition="age BETWEEN 18 AND 30", show=True)
+    data = db_api.search_data(table_name=table_name, fields="name", condition="age BETWEEN 18 AND 30", show=True)
     if data is None:
         raise RuntimeError("MySQL test failed.")
     logger.info("Case 2: return the fields of 'name' and 'age', and the condition is searching the users whose age is less than or equal to 18.")
-    data = db_api.search_data(table_name="user", fields=["name", "age"], condition="age<=18", show=True)
+    data = db_api.search_data(table_name=table_name, fields=["name", "age"], condition="age<=18", show=True)
     if data is None:
         raise RuntimeError("MySQL test failed.")
     logger.info("Case 3: return the fields of 'name', 'age' and 'add_date', and return all data")
-    data = db_api.search_data(table_name="user", fields=["name", "age", "add_date"], list_all=True, show=True)
+    data = db_api.search_data(table_name=table_name, fields=["name", "age", "add_date"], list_all=True, show=True)
     if data is None:
         raise RuntimeError("MySQL test failed.")
     logger.info("Case 4: return all fields and all data")
-    data = db_api.search_data(table_name="user", list_all=True, show=True)
+    data = db_api.search_data(table_name=table_name, list_all=True, show=True)
     if data is None:
         raise RuntimeError("MySQL test failed.")
     
     # update data
-    if not db_api.update_data(table_name="user", data=dict(age=18), condition="BINARY name='Weiming Chen'"):
+    if not db_api.update_data(table_name=table_name, data=dict(age=18), condition="BINARY name='Weiming Chen'"):
         raise RuntimeError("MySQL test failed.")
     
     # delete data
-    if not db_api.delete_data(table_name="user", condition="age>30"):
+    if not db_api.delete_data(table_name=table_name, condition="age>30"):
         raise RuntimeError("MySQL test failed.")
     
     # delete table
-    if not db_api.delete_table(table_name="user"):
+    if not db_api.delete_table(table_name=table_name):
         raise RuntimeError("MySQL test failed.")
 
     db_api.close()
@@ -107,7 +109,7 @@ def run():
 
     # create table
     status = db_api.create_table(
-        table_name="user",
+        table_name=table_name,
         table_config=[dict(name="id", dtype="integer", not_null=True, primary_key=True, auto_increment=True),
                       dict(name="name", dtype="text", not_null=True),
                       dict(name="age", dtype="integer", not_null=True),
@@ -122,7 +124,7 @@ def run():
         raise RuntimeError("SQLite test failed.")
     
     # get fields
-    if db_api.get_fields(table_name="user", show=True) is None:
+    if db_api.get_fields(table_name=table_name, show=True) is None:
         raise RuntimeError("SQLite test failed.")
     
     # insert data
@@ -131,37 +133,37 @@ def run():
                  dict(name="David", age=45, add_date=datetime.now().strftime("%Y-%m-%d")),
                  dict(name="Peter", age=35)]
     for data in user_data:
-        if not db_api.insert_data(table_name="user", data=data):
+        if not db_api.insert_data(table_name=table_name, data=data):
             raise RuntimeError("SQLite test failed.")
         
     # search data
     logger.info("Case 1: only return the field of 'name', and the condition is searching the users with age range from 18 to 30")
-    data = db_api.search_data(table_name="user", fields="name", condition="age BETWEEN 18 AND 30", show=True)
+    data = db_api.search_data(table_name=table_name, fields="name", condition="age BETWEEN 18 AND 30", show=True)
     if data is None:
         raise RuntimeError("SQLite test failed.")
     logger.info("Case 2: return the fields of 'name' and 'age', and the condition is searching the users whose age is less than or equal to 18.")
-    data = db_api.search_data(table_name="user", fields=["name", "age"], condition="age<=18", show=True)
+    data = db_api.search_data(table_name=table_name, fields=["name", "age"], condition="age<=18", show=True)
     if data is None:
         raise RuntimeError("SQLite test failed.")
     logger.info("Case 3: return the fields of 'name', 'age' and 'add_date', and return all data")
-    data = db_api.search_data(table_name="user", fields=["name", "age", "add_date"], list_all=True, show=True)
+    data = db_api.search_data(table_name=table_name, fields=["name", "age", "add_date"], list_all=True, show=True)
     if data is None:
         raise RuntimeError("SQLite test failed.")
     logger.info("Case 4: return all fields and all data")
-    data = db_api.search_data(table_name="user", list_all=True, show=True)
+    data = db_api.search_data(table_name=table_name, list_all=True, show=True)
     if data is None:
         raise RuntimeError("SQLite test failed.")
     
     # update data
-    if not db_api.update_data(table_name="user", data=dict(age=18), condition="name='Weiming Chen'"):
+    if not db_api.update_data(table_name=table_name, data=dict(age=18), condition="name='Weiming Chen'"):
         raise RuntimeError("SQLite test failed.")
     
     # delete data
-    if not db_api.delete_data(table_name="user", condition="age>30"):
+    if not db_api.delete_data(table_name=table_name, condition="age>30"):
         raise RuntimeError("SQLite test failed.")
     
     # delete table
-    if not db_api.delete_table(table_name="user"):
+    if not db_api.delete_table(table_name=table_name):
         raise RuntimeError("SQLite test failed.")
 
     db_api.close()
