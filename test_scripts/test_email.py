@@ -63,9 +63,9 @@ def run():
     smtp_api.send_email(
         receiver_name=args.receiver_name,
         receiver_email=args.receiver_email,
-        subject=f"Test Email from {platform.system()} using Python {args.python_version} (with SSL)",
-        content="""<div style="font-family: Microsoft YaHei; font-size: 14px;">
-                        This is a hello email sending through <span style="font-weight: bold;">mlcbase</span>.
+        subject=f"Test Email (with SSL)",
+        content=f"""<div style="font-family: Microsoft YaHei; font-size: 14px;">
+                        This is a hello email from {platform.system()} using Python {args.python_version} sending through <span style="font-weight: bold;">mlcbase</span>.
                    </div>""",
         attachment=attachment_path,
         signature=signature
@@ -83,9 +83,9 @@ def run():
     smtp_api.send_email(
         receiver_name=args.receiver_name,
         receiver_email=args.receiver_email,
-        subject=f"Test Email from {platform.system()} using Python {args.python_version} (without SSL)",
-        content="""<div style="font-family: Microsoft YaHei; font-size: 14px;">
-                        This is a hello email sending through <span style="font-weight: bold;">mlcbase</span>.
+        subject=f"Test Email (without SSL)",
+        content=f"""<div style="font-family: Microsoft YaHei; font-size: 14px;">
+                        This is a hello email from {platform.system()} using Python {args.python_version} sending through <span style="font-weight: bold;">mlcbase</span>.
                    </div>""",
         attachment=attachment_path,
         signature=signature
