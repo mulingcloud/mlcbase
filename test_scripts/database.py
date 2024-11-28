@@ -6,6 +6,7 @@ ROOT = Path(__file__).parent.parent
 import sys
 sys.path.append(str(ROOT/"src"))
 
+import platform
 from datetime import datetime
 from mlcbase import Logger, MySQLAPI, SQLiteAPI
 
@@ -26,7 +27,7 @@ def parse_args():
 
 def run():
     args = parse_args()
-    table_name = f"user_{''.join(args.python_version.split('.'))}"
+    table_name = f"user_{platform.system()}_{''.join(args.python_version.split('.'))}"
 
     logger = Logger()
     logger.init_logger()
