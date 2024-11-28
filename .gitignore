@@ -1,6 +1,7 @@
 .vscode/
 **/__pycache__/
 backup/
+test/
 
 # release
 release/
