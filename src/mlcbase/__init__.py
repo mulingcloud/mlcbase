@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2024 MuLingCloud
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -100,6 +99,5 @@ DESCRIPTION = "The base module of all MuLingCloud modules and applications."
 if not hasattr(__import__(NAME), NAME):
     from colorama import Fore
     
-    print(f"\n👋 {Fore.BLUE}Welcome to use {Fore.RED}MuLingCloud{Fore.BLUE}. "
-          f"We aim to let everything easier.{Fore.BLUE}\n\n"
-          f"📍 {Fore.YELLOW}{NAME} ({__version__}) imported{Fore.RESET}\n")
+    hello_msg = f"\n👋 {Fore.BLUE}Welcome to use {Fore.RED}MuLingCloud{Fore.BLUE}. We aim to let everything easier.{Fore.BLUE}\n\n📍 {Fore.YELLOW}{NAME} ({__version__}) imported{Fore.RESET}\n"
+    print(hello_msg.encode("utf-8").decode("utf-8"))
