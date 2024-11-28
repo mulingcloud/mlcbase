@@ -19,6 +19,9 @@ def parse_args():
     parser.add_argument("--database", required=True)
     parser.add_argument("--charset", default="utf8")
 
+    args = parser.parse_args()
+    return args
+
 
 def run():
     args = parse_args()
