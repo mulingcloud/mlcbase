@@ -18,9 +18,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Test ConfigDict
-        run: python test_scripts/config.py
+        run: python test_scripts/test_config.py
       - name: Test Database
-        run: python test_scripts/database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
 
   test_windows:
     runs-on: windows-latest
@@ -39,9 +41,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Test ConfigDict
-        run: python test_scripts/config.py
+        run: python test_scripts/test_config.py
       - name: Test Database
-        run: python test_scripts/database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
 
   test_macos:
     runs-on: macos-latest
@@ -60,9 +64,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Test ConfigDict
-        run: python test_scripts/config.py
+        run: python test_scripts/test_config.py
       - name: Test Database
-        run: python test_scripts/database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
 
   test_email_linux:
     runs-on: ubuntu-latest
@@ -78,7 +84,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Test Email
-        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --python_version "3.10"
   
   test_email_windows:
     runs-on: windows-latest
@@ -94,7 +100,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Test Email
-        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --python_version "3.10"
   
   test_email_macos:
     runs-on: macos-latest
@@ -110,4 +116,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Test Email
-        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --python_version "3.10"
