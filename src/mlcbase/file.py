@@ -20,6 +20,7 @@ Tester: Weiming Chen, Yuanshaung Sun
 """
 import os
 import shutil
+import hashlib
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Union
@@ -367,3 +368,11 @@ def get_meta_info(path: PathLikeType):
     meta_info.last_modify_time = datetime.fromtimestamp(path.lstat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')
 
     return meta_info
+
+
+@FILEOPT.register_module()
+def get_file_md5(path: Union[str, Path]):
+    assert Path(path).exists(), f"{path} not exists"
+    with open(path, "rb") as f:
+        md5 = hashlib.md5(f.read()).hexdigest()
+    return md5

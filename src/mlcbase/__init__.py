@@ -21,7 +21,7 @@ from .conifg import ConfigDict, is_config_dict
 from .logger import Logger
 from .timer import wrap_module_timer, delete_register_modules, show_register_modules, runtime_analysis
 from .emoji_pbar import EmojiProgressBar
-from .file import create, remove, listdir, get_file_size, get_dir_size, get_meta_info
+from .file import create, remove, listdir, get_file_size, get_dir_size, get_meta_info, get_file_md5
 from .loading import load_json, save_json, load_yaml, save_yaml, load_xml, save_xml, load_toml, save_toml
 from .image_io import get_image_from_url, load_image, save_image
 from .encrypt_password import encrypt_password, verify_password
@@ -53,7 +53,7 @@ __all__ = [
     "EmojiProgressBar", 
     
     # file
-    "create", "remove", "listdir", "get_file_size", "get_dir_size", "get_meta_info", 
+    "create", "remove", "listdir", "get_file_size", "get_dir_size", "get_meta_info", "get_file_md5",
     
     # loading
     "load_json", "save_json", "load_yaml", "save_yaml", "load_xml", "save_xml", "load_toml", "save_toml",
