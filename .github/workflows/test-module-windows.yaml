@@ -3,8 +3,6 @@ on: [push]
 jobs:
   main_job:
     runs-on: windows-latest
-    if: ${{ always() }}
-    needs: [linux_success_email, linux_fail_email]
     strategy:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
