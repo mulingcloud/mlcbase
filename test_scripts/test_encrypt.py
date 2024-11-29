@@ -221,6 +221,8 @@ def run():
     num_process = os.cpu_count()
     if num_process > 8:
         num_process = 8
+    if num_process > 1 and num_process % 2 != 0:
+        num_process -= 1
     num_threads = 8
     logger.info(f"Testing RSA acceleration with {num_process} processes and {num_threads} threads...")
     test_rsa_encrypt_large_file_accelerate(large_file_path, public_key, key_length, num_process, num_threads, logger)
