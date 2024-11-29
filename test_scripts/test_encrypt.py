@@ -1,3 +1,4 @@
+import os
 import random
 from datetime import datetime
 from pathlib import Path
@@ -217,8 +218,13 @@ def run():
     test_rsa_decrypt_small_file(small_file_path, private_key, key_length, logger)
     test_rsa_encrypt_large_file(large_file_path, public_key, key_length, logger)
     test_rsa_decrypt_large_file(large_file_path, private_key, key_length, logger)
-    test_rsa_encrypt_large_file_accelerate(large_file_path, public_key, key_length, 8, 8, logger)
-    test_rsa_decrypt_large_file_accelerate(large_file_path, private_key, key_length, 8, 8, logger)
+    num_process = os.cpu_count()
+    if num_process > 8:
+        num_process = 8
+    num_threads = 8
+    logger.info(f"Testing RSA acceleration with {num_process} processes and {num_threads} threads...")
+    test_rsa_encrypt_large_file_accelerate(large_file_path, public_key, key_length, num_process, num_threads, logger)
+    test_rsa_decrypt_large_file_accelerate(large_file_path, private_key, key_length, num_process, num_threads, logger)
     logger.success("RSA passed")
 
     end_time = datetime.now()
