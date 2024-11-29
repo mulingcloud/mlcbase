@@ -5,8 +5,6 @@
 <div align="center">
 
 [![PyPI](https://img.shields.io/pypi/v/mlcbase)](https://pypi.org/project/mlcbase/)
-[![build](https://img.shields.io/github/actions/workflow/status/mulingcloud/mlcbase/test-module.yaml
-)](https://github.com/mulingcloud/mlcbase/actions)
 [![License](https://img.shields.io/github/license/wmchen/mlcbase.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![All Contributors](https://img.shields.io/github/all-contributors/wmchen/mlcbase?color=blue)](#contributors)
 
@@ -20,9 +18,11 @@ MLCBase is an open source Python library for multiple uses. It is the base modul
 
 Supported platforms:
 
-- 😄 Windows (Python 3.6+)
-- 😄 Linux (Python 3.7+)
-- MacOS (untested, maybe. I don't have a MacOS machine😫. Anyone can help me?)
+All tests are conducted by Github workflows. Checking [workflows](https://github.com/mulingcloud/mlcbase/actions) for more information.
+
+- Linux: [![build](https://img.shields.io/github/actions/workflow/status/mulingcloud/mlcbase/test-module-linux.yaml)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-linux.yaml)
+- Windows: [![build](https://img.shields.io/github/actions/workflow/status/mulingcloud/mlcbase/test-module-windows.yaml)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-windows.yaml)
+- MacOS: [![build](https://img.shields.io/github/actions/workflow/status/mulingcloud/mlcbase/test-module-mac.yaml)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-mac.yaml)
 
 <details open>
 <summary>Features (v1.2.5)</summary>
