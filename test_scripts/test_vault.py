@@ -87,15 +87,15 @@ def run():
     logger.info("Testing delete secret path...")
     if not kv2_engine.delete_secret_path(mount_path, path):
         raise RuntimeError("KV v2 secret path delete failed")
-    logger.success("Testing KV v2 engine... [OK]")
+    # logger.success("Testing KV v2 engine... [OK]")
 
     ## TODO: TOTP
-    logger.info("Testing TOTP engine...")
-    logger.success("Testing TOTP engine... [OK]")
+    # logger.info("Testing TOTP engine...")
+    # logger.success("Testing TOTP engine... [OK]")
 
     ## TODO: Transit
-    logger.info("Testing Transit engine...")
-    logger.success("Testing Transit engine... [OK]")
+    # logger.info("Testing Transit engine...")
+    # logger.success("Testing Transit engine... [OK]")
 
 
 if __name__ == "__main__":
