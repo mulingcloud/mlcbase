@@ -569,6 +569,53 @@ class SFTP:
             self.logger.error(f'failed to list directory: {str(e)}')
             return None
         
+    def remote_remove(self, remote_path: PathLikeType, remote_platform: str):
+        """remove remote file or directory
+
+        Note that for remote directory, it will remove all the contents in the directory
+
+        Args:
+            remote_path (PathLikeType)
+            remote_platform (str)
+
+        Raises:
+            paramiko.SFTPError: when sftp connection is not established
+            PlatformNotSupportError: when remote platform is not supported
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
+        if self.__client is None:
+            self.logger.error('sftp connection is not established')
+            raise paramiko.SFTPError('sftp connection is not established')
+        
+        if remote_platform not in self.support_remote_platform:
+            self.logger.error('remote platform is not supported')
+            raise PlatformNotSupportError('remote platform is not supported')
+        
+        remote_path = self.__format_path(remote_path, remote_platform)
+        if not self.remote_exists(remote_path, remote_platform):
+            self.logger.error(f'remote file/directory not exist: {remote_path}')
+            return False
+        
+        try:
+            if self.remote_is_file(remote_path, remote_platform):
+                self.__client.remove(remote_path)
+            if self.remote_is_dir(remote_path, remote_platform):
+                dir_contents = self.remote_listdir(remote_path, remote_platform)
+                if len(dir_contents) > 0:
+                    # recursive remove all the contents in the directory
+                    for inner_path in dir_contents:
+                        self.remote_remove(inner_path, remote_platform)
+                    self.__client.rmdir(remote_path)
+                else:
+                    # direct remove empty directory
+                    self.__client.rmdir(remote_path)
+            return True
+        except paramiko.SFTPError as e:
+            self.logger.error(f'failed to remove file/directory: {str(e)}')
+            return False
+        
     def transfer_progress(self, transferred: int, total: int):
         if self.__pbar is None:
             self.__pbar = EmojiProgressBar(total=total, desc="Transferring")
