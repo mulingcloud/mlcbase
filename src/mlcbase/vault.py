@@ -182,7 +182,7 @@ class _VaultHTTPAPI:
         
         url = url.rstrip('/') + prefix
         self._key_len = 24
-        self._seed = random.randint(0, 1e10)
+        self._seed = random.randint(0, 2**32-1)
         self.is_auth, self.url, self.token = self.__authorize(url, auth_cfg)
 
     def __authorize(self, url: str, auth_cfg: Union[ConfigDict, dict]):
@@ -264,6 +264,40 @@ class VaultSecretEngineKV1(_VaultHTTPAPI):
         >>> )
     """
 
+    def create_secret_path(self, 
+                           mount_path: str, 
+                           path: str, 
+                           secrets: Optional[Union[dict, ConfigDict]] = None, 
+                           placeholder_name: str = "placeholder"):
+        if self.is_auth:
+            if secrets is not None:
+                if not is_dict(secrets):
+                    self.logger.error(f"{__class__.__name__} - create secret path error: secrets must be a dict or ConfigDict if it is not None")
+                    return False
+            else:
+                if placeholder_name is None:
+                    self.logger.error(f"{__class__.__name__} - create secret path error: placeholder_name must be provided if secrets is None")
+                secrets = {placeholder_name: random_hex(6)}
+
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+
+            # check if path exists
+            res = requests.get(url+f"{mount_path}/{path}", headers={"X-Vault-Token": token, "list": "true"})
+            if res.status_code == 200:
+                self.logger.error(f"{__class__.__name__} - create secret path error: path '{mount_path}/{path}' already exists")
+                return False
+            
+            # create secret path
+            res = requests.post(url+f"{mount_path}/{path}", headers={"X-Vault-Token": token}, data=secrets)
+            if res.status_code == 200 or res.status_code == 204:
+                return True
+            else:
+                self._log_error_response(__class__.__name__, res, "create secret path error")
+                return False
+        
+        return False
+
     def read_secret(self, mount_path: str, path: str, key: Optional[str] = None):
         """read a secret from "mount_path/path"
 
@@ -289,7 +323,7 @@ class VaultSecretEngineKV1(_VaultHTTPAPI):
                     return data
                 else:
                     if key in data.keys():
-                        return data.key
+                        return data[key]
                     else:
                         self.logger.error(f"{__class__.__name__} - read secret error: key '{key}' not found")
                         return None
@@ -491,6 +525,41 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
         >>>     auth_cfg=dict(method="userpass", username="username", password="password")
         >>> )
     """
+
+    def create_secret_path(self, 
+                           mount_path: str, 
+                           path: str, 
+                           secrets: Optional[Union[dict, ConfigDict]] = None, 
+                           placeholder_name: str = "placeholder"):
+        if self.is_auth:
+            if secrets is not None:
+                if not is_dict(secrets):
+                    self.logger.error(f"{__class__.__name__} - create secret path error: secrets must be a dict or ConfigDict if it is not None")
+                    return False
+            else:
+                if placeholder_name is None:
+                    self.logger.error(f"{__class__.__name__} - create secret path error: placeholder_name must be provided if secrets is None")
+                secrets = {placeholder_name: random_hex(6)}
+
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+
+            # check if path exists
+            res = requests.get(url+f"{mount_path}/metadata/{path}", headers={"X-Vault-Token": token, "list": "true"})
+            if res.status_code == 200:
+                self.logger.error(f"{__class__.__name__} - create secret path error: path '{mount_path}/{path}' already exists")
+                return False
+            
+            # create secret path
+            data = {"data": secrets}
+            res = requests.post(url+f"{mount_path}/data/{path}", headers={"X-Vault-Token": token}, data=json.dumps(data))
+            if res.status_code == 200 or res.status_code == 204:
+                return True
+            else:
+                self._log_error_response(__class__.__name__, res, "create secret path error")
+                return False
+        
+        return False
     
     def set_engine_config(self, mount_path: str, cfg: Union[dict, ConfigDict]):
         """set the configuration of the secret engine
@@ -1026,6 +1095,29 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
                 return False
             
         return False
+    
+    def list_secret(self, mount_path: str, path: str):
+        """list all scerets from "mount_path/path"
+
+        Args:
+            mount_path (str)
+            path (str)
+
+        Returns:
+            dict or None: return a dict if success, otherwise return None
+        """
+        if self.is_auth:
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            res = requests.get(url+f"{mount_path}/data/{path}", headers={"X-Vault-Token": token, "list": "true"})
+            if res.status_code == 200:
+                data = res.json()["data"]
+                return data["data"]
+            else:
+                self._log_error_response(__class__.__name__, res, "list secret error")
+                return None
+        
+        return None
     
     def delete_secret_path(self, mount_path: str, path: str):
         """delete the entire secret path of "mount_path/path"
