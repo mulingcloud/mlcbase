@@ -1,5 +1,6 @@
 import os
 import shutil
+import platform
 import argparse
 from pathlib import Path
 
@@ -31,6 +32,7 @@ def run():
     logger.init_logger()
 
     py_version = "".join(args.python_version.split("."))
+    sys_info = f"{platform.system()}_{py_version}"
 
     ## SSH
     logger.info("Testing SSH...")
@@ -49,15 +51,15 @@ def run():
     ## SFTP
     # prepare files
     local_file_path = str(ROOT/"tutorial"/"examples"/"jsonfile.json")
-    remote_file_path = args.root_path + f"/jsonfile_{py_version}.json"
+    remote_file_path = args.root_path + f"/jsonfile_{sys_info}.json"
     local_dir_path = str(ROOT/"tutorial"/"examples"/"example_dir")
-    remote_dir_path = args.root_path + f"/example_dir_{py_version}"
-    remote_mkdir_path = args.root_path + f"/test_mkdir_{py_version}"
-    local_recursive_dir_path = f"example_recursive_dir_{py_version}"
+    remote_dir_path = args.root_path + f"/example_dir_{sys_info}"
+    remote_mkdir_path = args.root_path + f"/test_mkdir_{sys_info}"
+    local_recursive_dir_path = f"example_recursive_dir_{sys_info}"
     create(local_recursive_dir_path)
     shutil.copyfile(local_file_path, os.path.join(local_recursive_dir_path, "jsonfile.json"))
     shutil.copytree(local_dir_path, os.path.join(local_recursive_dir_path, "example_dir"))
-    remote_recursive_dir_path = args.root_path + f"/example_recursive_dir_{py_version}"
+    remote_recursive_dir_path = args.root_path + f"/example_recursive_dir_{sys_info}"
 
     logger.info("Testing SFTP...")
     sftp_api = SFTP(host=args.host,
@@ -69,15 +71,15 @@ def run():
     if not sftp_api.upload_file(local_file_path, remote_file_path, "linux"):
         raise RuntimeError("upload file failed")
     logger.info("Testing download file...")
-    if not sftp_api.download_file(remote_file_path, f"localfile_{py_version}.json", "linux"):
+    if not sftp_api.download_file(remote_file_path, f"localfile_{sys_info}.json", "linux"):
         raise RuntimeError("download file failed")
-    if get_file_md5(local_file_path) != get_file_md5(f"localfile_{py_version}.json"):
+    if get_file_md5(local_file_path) != get_file_md5(f"localfile_{sys_info}.json"):
         raise RuntimeError("downloaded file md5 is not equal to the original file")
     logger.info("Testing upload directory...")
     if not sftp_api.upload_dir(local_dir_path, remote_dir_path, "linux"):
         raise RuntimeError("upload directory failed")
     logger.info("Testing download directory...")
-    if not sftp_api.download_dir(remote_dir_path, f"example_dir_{py_version}", "linux"):
+    if not sftp_api.download_dir(remote_dir_path, f"example_dir_{sys_info}", "linux"):
         raise RuntimeError("download directory failed")
     logger.info("Testing remote existence checking...")
     if not sftp_api.remote_exists(remote_file_path, "linux"):
@@ -112,8 +114,8 @@ def run():
     sftp_api.remote_remove(remote_dir_path, "linux")
     sftp_api.close()
 
-    remove(f"localfile_{py_version}.json")
-    remove(f"example_dir_{py_version}")
+    remove(f"localfile_{sys_info}.json")
+    remove(f"example_dir_{sys_info}")
     remove(local_recursive_dir_path)
     logger.info("All tests passed!")
 
