@@ -5,7 +5,6 @@ loguru
 pytz
 pyyaml
 toml
-rsa
 pycryptodome
 psutil
 requests

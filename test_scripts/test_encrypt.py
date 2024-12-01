@@ -196,11 +196,20 @@ def run():
     test_aes_decrypt_large_file(large_file_path, key, iv, AES.MODE_ECB, logger)
     logger.success("AES (ECB mode) passed")
 
+    remove(f"aes_encrypt_{AES.MODE_ECB}_{Path(small_file_path).name}.bin")
+    remove(f"aes_encrypt_{AES.MODE_CBC}_{Path(small_file_path).name}.bin")
+    remove(f"aes_encrypt_{AES.MODE_ECB}_{Path(large_file_path).name}.bin")
+    remove(f"aes_encrypt_{AES.MODE_CBC}_{Path(large_file_path).name}.bin")
+    remove(f"aes_decrypt_{AES.MODE_ECB}_{Path(small_file_path).name}")
+    remove(f"aes_decrypt_{AES.MODE_CBC}_{Path(small_file_path).name}")
+    remove(f"aes_decrypt_{AES.MODE_ECB}_{Path(large_file_path).name}")
+    remove(f"aes_decrypt_{AES.MODE_CBC}_{Path(large_file_path).name}")
+
     ## rsa
     logger.info("Testing RSA...")
     key_length = 2048
     logger.info(f"Creating RSA keys (key_length={key_length})...")
-    keys = create_rsa_keys(key_length=key_length, return_keys=True)
+    keys = create_rsa_keys(key_length=key_length, key_format="PKCS#8", return_keys=True)
     if keys is None:
         raise RuntimeError("Failed to create RSA keys")
     public_key, private_key = keys
@@ -228,6 +237,13 @@ def run():
     test_rsa_encrypt_large_file_accelerate(large_file_path, public_key, key_length, num_process, num_threads, logger)
     test_rsa_decrypt_large_file_accelerate(large_file_path, private_key, key_length, num_process, num_threads, logger)
     logger.success("RSA passed")
+
+    remove(f"rsa_small_encrypt_{Path(small_file_path).name}.bin")
+    remove(f"rsa_small_decrypt_{Path(small_file_path).name}")
+    remove(f"rsa_large_encrypt_{Path(large_file_path).name}.bin")
+    remove(f"rsa_large_decrypt_{Path(large_file_path).name}")
+    remove(f"rsa_large_accelerated_encrypt_{Path(large_file_path).name}.bin")
+    remove(f"rsa_large_accelerated_decrypt_{Path(large_file_path).name}")
 
     end_time = datetime.now()
     runtime_analysis(start_time, end_time, "s")
