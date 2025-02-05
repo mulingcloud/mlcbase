@@ -22,6 +22,7 @@ Supported auth meothods:
 Supported secret engines: 
 - KV v1
 - KV v2
+- Cubbyhole
 - TOTP
 - Transit
 
@@ -38,10 +39,15 @@ from datetime import datetime
 from typing import Optional, Union, List
 
 import pyotp
+from Crypto.PublicKey import RSA
+from Crypto.Hash import MD5, SHA1, SHA224, SHA256, SHA384, SHA512
+from Crypto.Cipher import AES
+from Crypto.Cipher import PKCS1_OAEP
 
 from .logger import Logger
 from .conifg import ConfigDict
 from .entrypt_aes import aes_encrypt_text, aes_decrypt_text
+from .entrypt_rsa import rsa_encrypt_text
 from .register import SECRET
 from .misc import random_hex, is_dict, is_str, is_list, is_int, is_base64
 
@@ -269,6 +275,17 @@ class VaultSecretEngineKV1(_VaultHTTPAPI):
                            path: str, 
                            secrets: Optional[Union[dict, ConfigDict]] = None, 
                            placeholder_name: str = "placeholder"):
+        """create a secret path
+
+        Args:
+            mount_path (str)
+            path (str)
+            secrets (Optional[Union[dict, ConfigDict]]): secret to be saved while creating the secret path. Defaults to None.
+            placeholder_name (str): the name placeholder secret, only be used when `secrets` is None. Defaults to "placeholder".
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
         if self.is_auth:
             if secrets is not None:
                 if not is_dict(secrets):
@@ -381,7 +398,7 @@ class VaultSecretEngineKV1(_VaultHTTPAPI):
             if exists_secrets is not None:
                 for key in exists_secrets.keys():
                     if key in secrets.keys():
-                        self.logger.warning(f"{__class__.__name__} - add secret error: key '{key}' already exists")
+                        self.logger.error(f"{__class__.__name__} - add secret error: key '{key}' already exists")
                         return False
                     secrets[key] = exists_secrets[key]
             else:
@@ -424,7 +441,7 @@ class VaultSecretEngineKV1(_VaultHTTPAPI):
             if exists_secrets is not None:
                 for key in secrets.keys():
                     if key not in exists_secrets.keys():
-                        self.logger.warning(f"{__class__.__name__} - update secret error: key '{key}' not found")
+                        self.logger.error(f"{__class__.__name__} - update secret error: key '{key}' not found")
                         return False
                     exists_secrets[key] = secrets[key]
             else:
@@ -531,6 +548,17 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
                            path: str, 
                            secrets: Optional[Union[dict, ConfigDict]] = None, 
                            placeholder_name: str = "placeholder"):
+        """create a secret path
+
+        Args:
+            mount_path (str)
+            path (str)
+            secrets (Optional[Union[dict, ConfigDict]]): secret to be saved while creating the secret path. Defaults to None.
+            placeholder_name (str): the name placeholder secret, only be used when `secrets` is None. Defaults to "placeholder".
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
         if self.is_auth:
             if secrets is not None:
                 if not is_dict(secrets):
@@ -792,7 +820,7 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
                 exists_secrets = exists_secrets[0]
                 for key in exists_secrets.keys():
                     if key in secrets.keys():
-                        self.logger.warning(f"{__class__.__name__} - add secret error: key '{key}' already exists")
+                        self.logger.error(f"{__class__.__name__} - add secret error: key '{key}' already exists")
                         return False
                     secrets[key] = exists_secrets[key]
             else:
@@ -853,7 +881,7 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
                 exists_secrets = exists_secrets[0]
                 for key in secrets.keys():
                     if key not in exists_secrets.keys():
-                        self.logger.warning(f"{__class__.__name__} - update secret error: key '{key}' not found")
+                        self.logger.error(f"{__class__.__name__} - update secret error: key '{key}' not found")
                         return False
                     exists_secrets[key] = secrets[key]
             else:
@@ -1050,6 +1078,8 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
     def destroy_secret(self, mount_path: str, path: str, version: Union[int, List[int]]):
         """destroy secrets in "mount_path/path"
 
+        Once the secret is destroyed, it cannot be recovered.
+
         Args:
             mount_path (str)
             path (str)
@@ -1096,20 +1126,65 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
             
         return False
     
-    def list_secret(self, mount_path: str, path: str):
+    def list_secret(self, mount_path: str, path: str, version: Optional[int] = None):
         """list all scerets from "mount_path/path"
 
         Args:
             mount_path (str)
             path (str)
+            version (Optional[int], optional): list a specific version of secret. if None, return the 
+                                               latest version of secret. Defaults to None.
 
         Returns:
             dict or None: return a dict if success, otherwise return None
         """
         if self.is_auth:
+            all_versions = self.get_all_secret_versions(mount_path, path)
+            if all_versions is None:
+                return None
+            
+            if version is not None:
+                if str(version) not in all_versions.keys():
+                    self.logger.error(f"{__class__.__name__} - list secret error: version '{version}' not found")
+                    return None
+                
+                if all_versions[str(version)]["destroyed"]:
+                    self.logger.error(f"{__class__.__name__} - list secret error: version '{version}' has "
+                                      f"been permanently destroyed")
+                    return None
+
+                if all_versions[str(version)]["deleted"]:
+                    self.logger.error(f"{__class__.__name__} - list secret error: version '{version}' has "
+                                      f"been deleted, please undelete it first")
+                    return None
+            else:
+                version = all_versions["current_version"]
+                switch_current_version = False
+                if all_versions[str(version)]["destroyed"]:
+                    self.logger.warning(f"{__class__.__name__} - read secret warning: current version '{version}' "
+                                        f"has been permanently destroyed, switching to another version...")
+                    switch_current_version = True
+                if all_versions[str(version)]["deleted"]:
+                    self.logger.warning(f"{__class__.__name__} - read secret warning: current version '{version}' "
+                                        f"has been deleted, switching to another version...")
+                    switch_current_version = True
+                
+                if switch_current_version:
+                    while True:
+                        version -= 1
+                        if str(version) not in all_versions.keys():
+                            self.logger.error(f"{__class__.__name__} - read secret error: no available versions")
+                            return None
+                        
+                        destroyed = all_versions[str(version)]["destroyed"]
+                        deleted = all_versions[str(version)]["deleted"]
+                        if not destroyed and not deleted:
+                            self.logger.info(f"{__class__.__name__} - read secret info: switch to version '{version}'")
+                            break
+            
             url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
             token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
-            res = requests.get(url+f"{mount_path}/data/{path}", headers={"X-Vault-Token": token, "list": "true"})
+            res = requests.get(url+f"{mount_path}/data/{path}?version={version}", headers={"X-Vault-Token": token, "list": "true"})
             if res.status_code == 200:
                 data = res.json()["data"]
                 return data["data"]
@@ -1142,6 +1217,279 @@ class VaultSecretEngineKV2(_VaultHTTPAPI):
                 self._log_error_response(__class__.__name__, res, "delete secret path error")
                 return False
             
+        return False
+    
+
+class VaultSecretEngineCubbyhole(_VaultHTTPAPI):
+    """Cubbyhole Secret Engine
+
+    The `cubbyhole` secrets engine is used to store arbitrary secrets within the configured physical 
+    storage for Vault namespaced to a token. In `cubbyhole`, paths are scoped per token. No token can 
+    access another token's cubbyhole (even root token). When the token expires, its cubbyhole is destroyed.
+
+    Also unlike the `kv` secrets engine, because the cubbyhole's lifetime is linked to that of an 
+    authentication token, there is no concept of a TTL or refresh interval for values contained in the 
+    token's cubbyhole.
+
+    Writing to a key in the `cubbyhole` secrets engine will completely replace the old value.
+    
+    Refer to https://developer.hashicorp.com/vault/api-docs/secret/cubbyhole for more details.
+
+    Init:
+        connecting with token:
+        >>> totp_engine = VaultSecretEngineTOTP(
+        >>>     url="http://127.0.0.1:8200", 
+        >>>     auth_cfg=dict(method="token", token="TOKEN")
+        >>> )
+
+        connecting with username & password:
+        >>> totp_engine = VaultSecretEngineTOTP(
+        >>>     url="http://127.0.0.1:8200",
+        >>>     auth_cfg=dict(method="userpass", username="username", password="password")
+        >>> )
+    """
+    def create_secret_path(self, 
+                           path: str, 
+                           secrets: Optional[Union[dict, ConfigDict]] = None, 
+                           placeholder_name: str = "placeholder"):
+        """create a secret path
+
+        Args:
+            path (str)
+            secrets (Optional[Union[dict, ConfigDict]]): secret to be saved while creating the secret path. Defaults to None.
+            placeholder_name (str): the name placeholder secret, only be used when `secrets` is None. Defaults to "placeholder".
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
+        if self.is_auth:
+            if secrets is not None:
+                if not is_dict(secrets):
+                    self.logger.error(f"{__class__.__name__} - create secret path error: secrets must be a dict or ConfigDict if it is not None")
+                    return False
+            else:
+                if placeholder_name is None:
+                    self.logger.error(f"{__class__.__name__} - create secret path error: placeholder_name must be provided if secrets is None")
+                secrets = {placeholder_name: random_hex(6)}
+
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+
+            # check if path exists
+            res = requests.get(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token, "list": "true"})
+            if res.status_code == 200:
+                self.logger.error(f"{__class__.__name__} - create secret path error: path 'cubbyhole/{path}' already exists")
+                return False
+            
+            # create secret path
+            res = requests.post(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token}, data=secrets)
+            if res.status_code == 200 or res.status_code == 204:
+                return True
+            else:
+                self._log_error_response(__class__.__name__, res, "create secret path error")
+                return False
+        
+        return False
+
+    def read_secret(self, path: str, key: Optional[str] = None):
+        """read a secret from "cubbyhole/path"
+
+        Args:
+            path (str)
+            key (Optional[str], optional): if key is None, returns all secrets in dict from 
+                                           "cubbyhole/path", which is the same as list_secret(). 
+                                           Defaults to None.
+
+        Returns:
+            dict: return a dict if key is not specified
+            str or int: return a str or int if key is specified
+            None: return None if an error occured
+        """
+        if self.is_auth:
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            res = requests.get(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token})
+            if res.status_code == 200:
+                data = res.json()["data"]
+                if key is None:
+                    return data
+                else:
+                    if key in data.keys():
+                        return data[key]
+                    else:
+                        self.logger.error(f"{__class__.__name__} - read secret error: key '{key}' not found")
+                        return None
+            else:
+                self._log_error_response(__class__.__name__, res, "read secret error")
+                return None
+            
+        return None
+    
+    def list_secret(self, path: str):
+        """list all scerets from "cubbyhole/path"
+
+        Args:
+            path (str)
+
+        Returns:
+            dict or None: return a dict if success, otherwise return None
+        """
+        if self.is_auth:
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            res = requests.get(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token, "list": "true"})
+            if res.status_code == 200:
+                data = res.json()["data"]
+                return data
+            else:
+                self._log_error_response(__class__.__name__, res, "list secret error")
+                return None
+        
+        return None
+
+    def add_secret(self, path: str, secrets: Union[dict, ConfigDict]):
+        """add secrets to "cubbyhole/path"
+        
+        You do not need to specify all the subkeys of secrets, only the subkeys that need to be added, which is convenient.
+
+        Args:
+            path (str)
+            secrets (Union[dict, ConfigDict])
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
+        if self.is_auth:
+            if not is_dict(secrets):
+                self.logger.error(f"{__class__.__name__} - add secret error: secrets must be a dict or ConfigDict")
+                return False
+            if len(list(secrets.keys())) == 0:
+                self.logger.error(f"{__class__.__name__} - add secret error: secrets must not be empty")
+                return False
+            
+            exists_secrets = self.list_secret(path)
+            if exists_secrets is not None:
+                for key in exists_secrets.keys():
+                    if key in secrets.keys():
+                        self.logger.error(f"{__class__.__name__} - add secret error: key '{key}' already exists")
+                        return False
+                    secrets[key] = exists_secrets[key]
+            else:
+                return False
+                
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            secrets.update(exists_secrets)
+            res = requests.post(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token}, data=secrets)
+            if res.status_code == 200 or res.status_code == 204:
+                return True
+            else:
+                self._log_error_response(__class__.__name__, res, "add secret error")
+                return False
+        
+        return False
+
+    def update_secret(self, path: str, secrets: Union[dict, ConfigDict]):
+        """update the existing secret in "cubbyhole/path"
+        
+        You do not need to specify all the subkeys of secrets, only the subkeys that need to be updated, which is convenient.
+
+        Args:
+            path (str)
+            secrets (Union[dict, ConfigDict])
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
+        if self.is_auth:
+            if not is_dict(secrets):
+                self.logger.error(f"{__class__.__name__} - update secret error: secrets must be a dict or ConfigDict")
+                return False
+            if len(list(secrets.keys())) == 0:
+                self.logger.error(f"{__class__.__name__} - update secret error: secrets must not be empty")
+                return False
+            
+            exists_secrets = self.list_secret(path)
+            if exists_secrets is not None:
+                for key in secrets.keys():
+                    if key not in exists_secrets.keys():
+                        self.logger.error(f"{__class__.__name__} - update secret error: key '{key}' not found")
+                        return False
+                    exists_secrets[key] = secrets[key]
+            else:
+                return False
+            
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            res = requests.post(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token}, data=exists_secrets)
+            if res.status_code == 200 or res.status_code == 204:
+                return True
+            else:
+                self._log_error_response(__class__.__name__, res, "update secret error")
+                return False
+        
+        return False
+
+    def delete_secret(self, path: str, key: Union[str, List[str]]):
+        """delete the existing secret from "cubbyhole/path"
+
+        Args:
+            path (str)
+            key (Union[str, List[str]])
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
+        if self.is_auth:
+            if is_str(key):
+                key = [key]
+            if not is_list(key):
+                self.logger.error(f"{__class__.__name__} - delete secret error: key must be a str or list of str")
+                return False
+            if len(key) == 0:
+                self.logger.error(f"{__class__.__name__} - delete secret error: key must not be empty")
+                return False
+
+            exists_secrets = self.list_secret(path)
+            if exists_secrets is not None:
+                for k in key:
+                    if k not in exists_secrets.keys():
+                        self.logger.warning(f"{__class__.__name__} - delete secret error: key '{k}' not found")
+                        return False
+                    del exists_secrets[k]
+            else:
+                return False
+            
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            res = requests.post(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token}, data=exists_secrets)
+            if res.status_code == 200 or res.status_code == 204:
+                return True
+            else:
+                self._log_error_response(__class__.__name__, res, "delete secret error")
+                return False
+        
+        return False
+
+    def delete_secret_path(self, path: str):
+        """delete the entire secret path of "cubbyhole/path"
+
+        Args:
+            path (str)
+
+        Returns:
+            bool: return True if success, otherwise return False
+        """
+        if self.is_auth:
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            res = requests.delete(url+f"cubbyhole/{path}", headers={"X-Vault-Token": token})
+            if res.status_code == 200 or res.status_code == 204:
+                return True
+            else:
+                self._log_error_response(__class__.__name__, res, "delete secret path error")
+                return False
+
         return False
     
 
@@ -1188,6 +1536,8 @@ class VaultSecretEngineTOTP(_VaultHTTPAPI):
             mount_path (str)
             name (str): Specifies the name of the key to create. This is specified as part of the URL.
             account_name (str): Specifies the name of the account associated with the key. Defaults to None.
+            exported (bool, optional): Specifies if a QR code and url are returned upon generating a key. 
+                                       Only used if generate is true. Defaults to True.
             key_size (int, optional): Specifies the size in bytes of the Vault generated key. Defaults to 20.
             issuer (str, optional): Specifies the name of the key's issuing organization. Defaults to MuLingCloud.
             period (int, optional): Specifies the length of time in seconds used to generate a counter for the 
@@ -1210,11 +1560,15 @@ class VaultSecretEngineTOTP(_VaultHTTPAPI):
             dict or None: return a dict if success, otherwise return None
         """
         if self.is_auth:
-            exist_keys = self.list_key(mount_path)
-            if exist_keys is not None:
-                if name in exist_keys:
-                    self.logger.error(f"{__class__.__name__} - create key error: key '{name}' already exists")
-                    return None
+            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
+            res = requests.get(url+f"{mount_path}/keys?list=true", headers={"X-Vault-Token": token})
+            if res.status_code == 200 or res.status_code == 204:
+                exist_keys = res.json()["data"]["keys"]
+                if exist_keys is not None:
+                    if name in exist_keys:
+                        self.logger.error(f"{__class__.__name__} - create key error: key '{name}' already exists")
+                        return None
                 
             if algorithm not in ["SHA1", "SHA256", "SHA512"]:
                 self.logger.error(f"{__class__.__name__} - create key error: algorithm must be one of "
@@ -1247,8 +1601,6 @@ class VaultSecretEngineTOTP(_VaultHTTPAPI):
             else:
                 data["qr_size"] = qr_size
             
-            url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
-            token = aes_decrypt_text(self.token, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))
             res = requests.post(url+f"{mount_path}/keys/{name}", headers={"X-Vault-Token": token}, data=json.dumps(data))
             if res.status_code == 200 or res.status_code == 204:
                 response_data = res.json()["data"]
@@ -1569,7 +1921,7 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
         
         "ed25519",            # ED25519 (asymmetric, supports derivation). When using derivation, 
                               # a sign operation with the same context will derive the same key and signature; 
-                              # this is a signing analogue to convergent_encryption
+                              # this is a signing analogue to convergent encryption
                               
         "ecdsa-p256",         # ECDSA using the P-256 elliptic curve (asymmetric)
         "ecdsa-p384",         # ECDSA using the P-384 elliptic curve (asymmetric)
@@ -1582,7 +1934,6 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
         "hmac"                # HMAC (HMAC generation, verification)
     ]
     
-    # TODO: parital tested, wait for testing
     def create_key(self, 
                    mount_path: str, 
                    name: str,
@@ -1675,11 +2026,77 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
                 return False
         
         return False
+    
+    # TODO: wait for testing
+    def wrap_private_or_symmetric_key(self, 
+                                      mount_path: str, 
+                                      target_key: str,
+                                      hash_method: str = "SHA256",
+                                      encoding: str = "utf-8") -> str:
+        """wrap a private or symmetric key
+
+        This function is implemented following the BYOK instructions:
+        https://developer.hashicorp.com/vault/docs/v1.17.x/secrets/transit#bring-your-own-key-byok
+
+        Args:
+            mount_path (str)
+            target_key (str): the target key waiting for wrap.
+            hash_method (str, optional): The hash function used for the RSA-OAEP step of creating the 
+                                         ciphertext. Supported hash functions are: SHA1, SHA224, SHA256, 
+                                         SHA384, and SHA512. Defaults to "SHA256".
+            encoding (str, optional): Defaults to "utf-8".
+        
+        Returns:
+            str: ciphertext used to import into Vault
+            Ciphertext is a base64-encoded string that contains two values: 
+            an ephemeral 256-bit AES key wrapped using the wrapping key returned 
+            by Vault and the encryption of the import key material under the 
+            provided AES key. The wrapped AES key should be the first 512 bytes 
+            of the ciphertext, and the encrypted key material should be the 
+            remaining bytes. If public_key is set, this field is not required. 
+            See the BYOK (Bring your own key) section of the Transit secrets engine 
+            documentation for more information on constructing the ciphertext. 
+        """
+        hash_method = hash_method.replace("-", "")
+        assert hash_method in ['MD5', 'SHA1', 'SHA224', 'SHA256', 'SHA384', 'SHA512']
+        
+        # 1. Generate an ephemeral 256-bit AES key
+        ephemeral_aes_key = random_hex(32, seed=random.randint(0, 2**32-1))
+
+        # 2. Get transit wrapping key from Vault
+        wrapping_key = self.get_wrapping_key(mount_path)
+
+        # 3. Wrap the target key using the ephemeral AES key with AES-KWP
+        wrapped_target_key = aes_encrypt_text(target_key, key=ephemeral_aes_key, mode=AES.MODE_ECB)
+
+        # 4. Wrap the AES key under the Vault wrapping key
+        key = RSA.import_key(wrapping_key.encode("utf-8"))
+        if hash_method == "MD5":
+            hash_func = MD5
+        elif hash_method == "SHA1":
+            hash_func = SHA1
+        elif hash_method == "SHA224":
+            hash_func = SHA224
+        elif hash_method == "SHA256":
+            hash_func = SHA256
+        elif hash_method == "SHA384":
+            hash_func = SHA384
+        elif hash_method == "SHA512":
+            hash_func = SHA512
+        wrapped_aes_key = PKCS1_OAEP.new(key, hashAlgo=hash_func).encrypt(ephemeral_aes_key.encode(encoding))
+
+        # 5. Append the wrapped target key to the wrapped AES key
+        cipherbytes = wrapped_aes_key + wrapped_target_key
+
+        # 6. Base64 encode the result
+        ciphertext = base64.b64encode(cipherbytes)
+
+        return ciphertext.decode(encoding)
 
     def import_key(self, 
                    mount_path: str,
                    name: str,
-                   ciphertext: str = "",
+                   private_or_symmetric_key: str = "",
                    hash_function: str = "SHA256",
                    key_type: str = "aes256-gcm96",
                    public_key: str = "",
@@ -1688,7 +2105,8 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
                    context: str = "",
                    exportable: bool = False,
                    allow_plaintext_backup: bool = False,
-                   auto_rotate_period: str = "0"):
+                   auto_rotate_period: str = "0",
+                   encoding: str = "utf-8"):
         """import existing key material into a new transit-managed encryption key
         
         This supports one of two forms:
@@ -1702,15 +2120,9 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
         Args:
             mount_path (str)
             name (str): Specifies the name of the encryption key to create. This is specified as part of the URL.
-            ciphertext (str, optional): A base64-encoded string that contains two values: an ephemeral 
-                                        256-bit AES key wrapped using the wrapping key returned by Vault 
-                                        and the encryption of the import key material under the provided 
-                                        AES key. The wrapped AES key should be the first 512 bytes of the 
-                                        ciphertext, and the encrypted key material should be the remaining 
-                                        bytes. If public_key is set, this field is not required. See the 
-                                        BYOK (Bring your own key) section of the Transit secrets engine 
-                                        documentation for more information on constructing the ciphertext. 
-                                        Defaults to "".
+            private_or_symmetric_key (str, optional): A plaintext private or symmetric key to be imported. 
+                                                      If public_key is set, this field is not required. 
+                                                      Defaults to "".
             hash_function (str, optional): The hash function used for the RSA-OAEP step of creating the 
                                            ciphertext. Supported hash functions are: SHA1, SHA224, SHA256, 
                                            SHA384, and SHA512. Defaults to "SHA256".
@@ -1734,6 +2146,7 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
             auto_rotate_period (str, optional): The period at which this key should be rotated automatically. 
                                                 Setting this to "0" (the default) will disable automatic key 
                                                 rotation. This value cannot be shorter than one hour. Defaults to "0".
+            encoding (str, optional): Defaults to "utf-8".
 
         Returns:
             bool: return True if success, otherwise return False
@@ -1754,18 +2167,20 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
             if public_key != "":
                 payload["public_key"] = public_key
             else:
-                if ciphertext == "":
-                    self.logger.error(f"{__class__.__name__} - import key error: ciphertext cannot be empty when public_key is empty")
+                if private_or_symmetric_key == "":
+                    self.logger.error(f"{__class__.__name__} - import key error: private_or_symmetric_key cannot be empty when public_key is empty")
                     return False
                 
-            if ciphertext != "":
-                if not is_base64(ciphertext):
-                    self.logger.error(f"{__class__.__name__} - import key error: ciphertext must be base64 encoded")
-                    return False
+            if private_or_symmetric_key != "":
+                ciphertext = self.wrap_private_or_symmetric_key(mount_path=mount_path, 
+                                                                target_key=private_or_symmetric_key, 
+                                                                hash_method=hash_function, 
+                                                                encoding=encoding)
                 payload["ciphertext"] = ciphertext
             
             if payload.ciphertext is not None:
                 support_hash_function = ["SHA1", "SHA224", "SHA256", "SHA384", "SHA512"]
+                hash_function = hash_function.replace("-", "")
                 if hash_function not in support_hash_function:
                     self.logger.error(f"{__class__.__name__} - import key error: hash_function must be one of {support_hash_function}")
                     return False
@@ -1896,7 +2311,7 @@ class VaultSecretEngineTransit(_VaultHTTPAPI):
             mount_path (str)
 
         Returns:
-            dict or None: return dict if success, otherwise return None
+            str or None: return str if success, otherwise return None
         """
         if self.is_auth:
             url = aes_decrypt_text(self.url, key=random_hex(self._key_len, self._seed*2), iv=random_hex(16, self._seed*3))

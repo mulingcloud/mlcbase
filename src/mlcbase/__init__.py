@@ -29,15 +29,15 @@ from .entrypt_aes import aes_encrypt_text, aes_decrypt_text, aes_entrypt_file, a
 from .entrypt_rsa import (create_rsa_keys, rsa_encrypt_text, rsa_decrypt_text, rsa_sign_text,
                           rsa_verify_signature, rsa_encrypt_file, rsa_decrypt_file)
 from .otp import generate_otp_secret, generate_otp_code, verify_otp_code
-from .vault import (VaultDuration, VaultSecretEngineKV1, VaultSecretEngineKV2, VaultSecretEngineTOTP, 
-                    VaultSecretEngineTransit)
+from .vault import (VaultDuration, VaultSecretEngineKV1, VaultSecretEngineKV2, VaultSecretEngineCubbyhole,
+                    VaultSecretEngineTOTP, VaultSecretEngineTransit)
 from .database import MySQLAPI, SQLiteAPI
 from .remote_connect import SSH, SFTP
 from .email import SMTPAPI
 from .register import Registry, DATABASE, EMAIL, SECRET, FILEOPT, IMAGEIO, REMOTE
 from .misc import (is_type, is_bytes, is_str, is_int, is_float, is_bool, is_list, is_dict,
                    is_tuple, is_path, is_url, is_base64, random_hex, random_otp_secret, get_net_info,
-                   is_canonical_version, parse_version)
+                   is_canonical_version, parse_version, path_join)
 
 __all__ = [
     # config
@@ -75,7 +75,8 @@ __all__ = [
     "generate_otp_secret", "generate_otp_code", "verify_otp_code", 
     
     # vault
-    "VaultDuration", "VaultSecretEngineKV1", "VaultSecretEngineKV2", "VaultSecretEngineTOTP", "VaultSecretEngineTransit", 
+    "VaultDuration", "VaultSecretEngineKV1", "VaultSecretEngineKV2", "VaultSecretEngineCubbyhole", "VaultSecretEngineTOTP", 
+    "VaultSecretEngineTransit", 
     
     # database
     "MySQLAPI", "SQLiteAPI", 
@@ -91,11 +92,11 @@ __all__ = [
     
     # misc
     "is_type", "is_bytes", "is_str", "is_int", "is_float", "is_bool", "is_list", "is_dict", "is_tuple", "is_path", "is_url", 
-    "is_base64", "random_hex", "random_otp_secret", "get_net_info", "is_canonical_version", "parse_version"
+    "is_base64", "random_hex", "random_otp_secret", "get_net_info", "is_canonical_version", "parse_version", "path_join"
 ]
 
 
-__version__ = "1.2.5"
+__version__ = "1.2.6"
 TYPE_NAME = "module"
 NAME = "mlcbase"
 DESCRIPTION = "The base module of all MuLingCloud modules and applications."

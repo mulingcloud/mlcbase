@@ -1,11 +1,39 @@
 # Changelog
 
+## 1.2.6
+
+### New Feature
+
+- Support the key format of "PKCS#8" for RSA.
+- Support the export format of "DER" for RSA.
+- Add a new feature of `get_file_md5()` that can get the md5 of a file.
+- Add a new feature in `SFTP` that can remove a remote file or directory.
+- Add a new feature in `VaultSecretEngineKV1` that can create secret path.
+- Add a new feature in `VaultSecretEngineKV2` that can create secret path.
+- Add a new feature in `VaultSecretEngineKV2` that listing existing secret keys.
+- Add a new feature that support [Cubbyhole](https://developer.hashicorp.com/vault/docs/secrets/cubbyhole) backend for vault.
+- Add a new feature that join paths automatically depending on the OS type.
+
+### Fix Bug
+
+- Fix the bug in Vault API that would raise error (generating random seed) when the Python version is greater than 3.11.
+- Fix the bug in `VaultSecretEngineKV1` that `read_secret()` fail to return secret due to dict type calling error.
+- Fix the bug of docs of `get_wrapping_key()` in `VaultSecretEngineTransit` that it would return a string (not a dict) of public key if success.
+- Fix the bug of uploading attachments in `SMTPAPI.send_email()` method.
+
+### BREAKING CHANGE
+
+- Deprecate the `rsa` library.
+- Pass in the OS type of the remote server when instantiating `SFTP`.
+
+
 ## 1.2.5
 
 ### Small Change
 
 - Would not establish SSH connection when creating an SFTP connection.
 - Offer a default transferring progress bar for SFTP operations.
+
 
 ## 1.2.4
 
@@ -24,11 +52,13 @@
 
 - Modify the logo url address in `generate_otp_secret()`
 
+
 ## 1.2.3
 
 ### Small Change
 
 - Refactor `EmojiProgressBar`, which would not depend on the `rich` library anymore.
+
 
 ## 1.2.2
 
@@ -43,6 +73,7 @@
 ### BREAKING CHANGE
 
 - Deprecate `get_mac_address()` as it is only applicable to single network iterface card.
+
 
 ## 1.2.1
 

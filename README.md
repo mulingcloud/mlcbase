@@ -20,12 +20,12 @@ Supported platforms:
 
 All tests are conducted by Github workflows. Checking [workflows](https://github.com/mulingcloud/mlcbase/actions) for more information.
 
-- Linux: [![build](https://img.shields.io/github/actions/workflow/status/mulingcloud/mlcbase/test-module-linux.yaml)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-linux.yaml)
-- Windows: [![build](https://img.shields.io/github/actions/workflow/status/mulingcloud/mlcbase/test-module-windows.yaml)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-windows.yaml)
-- MacOS: [![build](https://img.shields.io/github/actions/workflow/status/mulingcloud/mlcbase/test-module-mac.yaml)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-mac.yaml)
+- Linux: [![Test mlcbase on Linux](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-linux.yaml/badge.svg)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-linux.yaml)
+- Windows: [![Test mlcbase on Windows](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-windows.yaml/badge.svg)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-windows.yaml)
+- MacOS: [![Test mlcbase on MacOS](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-mac.yaml/badge.svg)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-mac.yaml)
 
 <details open>
-<summary>Features (v1.2.5)</summary>
+<summary>Features (v1.2.6)</summary>
 
 - **Register**
 
@@ -73,11 +73,11 @@ All tests are conducted by Github workflows. Checking [workflows](https://github
 
 - **Email**
 
-    We offer a simple API to send email. Currently only supports SMTP (with SSL) server.
+    We offer a simple API (SMTP) to send email.
 
 - **HashiCorp Vault**
 
-    We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported authorization methods: token, username & password. Supported secret engines: KV v1, KV v2, TOTP, Transit.
+    We offer several APIs to operate [HashiCorp/Vault](https://developer.hashicorp.com/vault) through HTTP requests. Supported authorization methods: token, username & password. Supported secret engines: [KV v1](https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v1), [KV v2](https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v2), [Cubbyhole](https://developer.hashicorp.com/vault/docs/secrets/cubbyhole), [TOTP](https://developer.hashicorp.com/vault/docs/secrets/totp), [Transit](https://developer.hashicorp.com/vault/docs/secrets/transit).
 
 </details>
 

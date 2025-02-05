@@ -30,7 +30,8 @@ from typing import Optional, Union, List, Tuple, Any
 
 from Crypto.PublicKey import RSA
 from Crypto.Hash import MD5, SHA1, SHA224, SHA256, SHA384, SHA512
-from Crypto.Cipher import PKCS1_v1_5 as pkcs1_cipher
+from Crypto.Cipher import PKCS1_v1_5 as pkcs1_v1_5
+from Crypto.Cipher import PKCS1_OAEP as pkcs1_oaep
 from Crypto.Signature import PKCS1_v1_5 as pkcs1_signer
 
 from .logger import Logger
@@ -42,7 +43,7 @@ PathLikeType = Union[str, Path]
 
 
 class _EncryptTextThread(Thread):
-    def __init__(self, plain_text, public_key, key_length, base64_encode):
+    def __init__(self, plain_text, public_key, key_length, cipher_type, base64_encode):
         Thread.__init__(self)
         self.plain_text = plain_text
         self.public_key = public_key
@@ -50,10 +51,15 @@ class _EncryptTextThread(Thread):
         self.base64_encode = base64_encode
         self.cipher_text = None
 
+        if cipher_type == "OAEP":
+            self.cipher = pkcs1_oaep
+        elif cipher_type == "v1.5":
+            self.cipher = pkcs1_v1_5
+
     def run(self):
         default_length = self.key_length // 8 - 11
         if len(self.plain_text) <= default_length:
-            cipher_text = pkcs1_cipher.new(self.public_key).encrypt(self.plain_text)
+            cipher_text = self.cipher.new(self.public_key).encrypt(self.plain_text)
             if self.base64_encode:
                 cipher_text = base64.b64encode(cipher_text)
         else:
@@ -61,12 +67,12 @@ class _EncryptTextThread(Thread):
             cipher_text = []
             while len(self.plain_text) - offset > 0:
                 if len(self.plain_text) - offset > default_length:
-                    sub_cipher_text = pkcs1_cipher.new(self.public_key).encrypt(self.plain_text[offset:offset+default_length])
+                    sub_cipher_text = self.cipher.new(self.public_key).encrypt(self.plain_text[offset:offset+default_length])
                     if self.base64_encode:
                         sub_cipher_text = base64.b64encode(sub_cipher_text)
                     cipher_text.append(sub_cipher_text)
                 else:
-                    sub_cipher_text = pkcs1_cipher.new(self.public_key).encrypt(self.plain_text[offset:])
+                    sub_cipher_text = self.cipher.new(self.public_key).encrypt(self.plain_text[offset:])
                     if self.base64_encode:
                         sub_cipher_text = base64.b64encode(sub_cipher_text)
                     cipher_text.append(sub_cipher_text)
@@ -75,16 +81,30 @@ class _EncryptTextThread(Thread):
 
 
 class _DecryptTextThread(Thread):
-    def __init__(self, cipher_text, private_key, return_str, key_length, base64_decode, encoding, sentinel):
+    def __init__(self, 
+                 cipher_text, 
+                 private_key, 
+                 return_str, 
+                 key_length, 
+                 cipher_type, 
+                 base64_decode, 
+                 encoding, 
+                 sentinel):
         Thread.__init__(self)
         self.cipher_text = cipher_text
         self.private_key = private_key
         self.return_str = return_str
         self.key_length = key_length
+        self.cipher_type = cipher_type
         self.encoding = encoding
         self.base64_decode = base64_decode
         self.sentinel = sentinel
         self.plain_text = None
+
+        if cipher_type == "OAEP":
+            self.cipher = pkcs1_oaep
+        elif cipher_type == "v1.5":
+            self.cipher = pkcs1_v1_5
 
     def run(self):
         if is_list(self.cipher_text):
@@ -96,7 +116,10 @@ class _DecryptTextThread(Thread):
             for c in self.cipher_text:
                 if self.base64_decode:
                     c = base64.b64decode(c)
-                sub_plain_text = pkcs1_cipher.new(self.private_key).decrypt(c, self.sentinel)
+                if self.cipher_type == "OAEP":
+                    sub_plain_text = self.cipher.new(self.private_key).decrypt(c)
+                elif self.cipher_type == "v1.5":
+                    sub_plain_text = self.cipher.new(self.private_key).decrypt(c, self.sentinel)
                 if self.return_str:
                     sub_plain_text = sub_plain_text.decode(self.encoding)
                 plain_text += sub_plain_text
@@ -115,18 +138,27 @@ class _DecryptTextThread(Thread):
 
                 while length - offset > 0:
                     if length - offset > chunk_length:
-                        sub_plain_text = pkcs1_cipher.new(self.private_key).decrypt(self.cipher_text[offset:offset+chunk_length], self.sentinel)
+                        if self.cipher_type == "OAEP":
+                            sub_plain_text = self.cipher.new(self.private_key).decrypt(self.cipher_text[offset:offset+chunk_length])
+                        elif self.cipher_type == "v1.5":
+                            sub_plain_text = self.cipher.new(self.private_key).decrypt(self.cipher_text[offset:offset+chunk_length], self.sentinel)
                         if self.return_str:
                             sub_plain_text = sub_plain_text.decode(self.encoding)
                         plain_text += sub_plain_text
                     else:
-                        sub_plain_text = pkcs1_cipher.new(self.private_key).decrypt(self.cipher_text[offset:], self.sentinel)
+                        if self.cipher_type == "OAEP":
+                            sub_plain_text = self.cipher.new(self.private_key).decrypt(self.cipher_text[offset:])
+                        elif self.cipher_type == "v1.5":
+                            sub_plain_text = self.cipher.new(self.private_key).decrypt(self.cipher_text[offset:], self.sentinel)
                         if self.return_str:
                             sub_plain_text = sub_plain_text.decode(self.encoding)
                         plain_text += sub_plain_text
                     offset += chunk_length
             else:
-                plain_text = pkcs1_cipher.new(self.private_key).decrypt(self.cipher_text, self.sentinel)
+                if self.cipher_type == "OAEP":
+                    plain_text = self.cipher.new(self.private_key).decrypt(self.cipher_text)
+                elif self.cipher_type == "v1.5":
+                    plain_text = self.cipher.new(self.private_key).decrypt(self.cipher_text, self.sentinel)
                 if self.return_str:
                     plain_text = plain_text.decode(self.encoding)
         
@@ -189,6 +221,7 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
                      public_key: Union[bytes, PathLikeType], 
                      key_length: int = 2048,
                      num_threads: int = 1,
+                     cipher_type: str = "OAEP",
                      base64_encode: bool = True,
                      encoding: str = "utf-8") -> Union[bytes, List[bytes]]:
     """encrypt plain text with rsa public key
@@ -199,6 +232,7 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
         key_length (int, optional): Defaults to 2048.
         num_threads (int, optional): Thread numbers to use, which is larger or equal to 1. 
                                      Defaults to 1.
+        cipher_type (str, optional): cipher type, options including "OAEP" and "v1.5". Defaults to "OAEP".
         base64_encode (bool, optional): Whether to encode the ciphertext with base64. Defaults to True.
         encoding (str, optional): Defaults to "utf-8".
 
@@ -209,6 +243,11 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
     assert is_str(plain_text) or is_bytes(plain_text), "plain_text must be a string or bytes"
     assert is_str(public_key) or is_path(public_key) or is_bytes(public_key), \
         "public_key must be a bytes or a path"
+    assert cipher_type in ["OAEP", "v1.5"], "cipher_type must be OAEP or v1.5"
+    if cipher_type == "OAEP":
+        cipher = pkcs1_oaep
+    elif cipher_type == "v1.5":
+        cipher = pkcs1_v1_5
 
     # load public key
     if is_str(public_key) or is_path(public_key):
@@ -226,9 +265,9 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
         threads = []
         for i in range(num_threads):
             if i < num_threads - 1:
-                thread = _EncryptTextThread(plain_text[i * length:(i + 1) * length], key, key_length, base64_encode)
+                thread = _EncryptTextThread(plain_text[i * length:(i + 1) * length], key, key_length, cipher_type, base64_encode)
             else:
-                thread = _EncryptTextThread(plain_text[i * length:], key, key_length, base64_encode)
+                thread = _EncryptTextThread(plain_text[i * length:], key, key_length, cipher_type, base64_encode)
             threads.append(thread)
             thread.start()
 
@@ -242,7 +281,7 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
     else:
         default_length = key_length // 8 - 11
         if len(plain_text) <= default_length:
-            cipher_text = pkcs1_cipher.new(key).encrypt(plain_text)
+            cipher_text = cipher.new(key).encrypt(plain_text)
             if base64_encode:
                 cipher_text = base64.b64encode(cipher_text)
         else:
@@ -250,12 +289,12 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
             cipher_text = []
             while len(plain_text) - offset > 0:
                 if len(plain_text) - offset > default_length:
-                    sub_cipher_text = pkcs1_cipher.new(key).encrypt(plain_text[offset:offset+default_length])
+                    sub_cipher_text = cipher.new(key).encrypt(plain_text[offset:offset+default_length])
                     if base64_encode:
                         sub_cipher_text = base64.b64encode(sub_cipher_text)
                     cipher_text.append(sub_cipher_text)
                 else:
-                    sub_cipher_text = pkcs1_cipher.new(key).encrypt(plain_text[offset:])
+                    sub_cipher_text = cipher.new(key).encrypt(plain_text[offset:])
                     if base64_encode:
                         sub_cipher_text = base64.b64encode(sub_cipher_text)
                     cipher_text.append(sub_cipher_text)
@@ -269,6 +308,7 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
                      private_key: Union[bytes, PathLikeType],
                      key_length: int = 2048,
                      num_threads: int = 1,
+                     cipher_type: str = "OAEP",
                      base64_decode: bool = True,
                      return_str: bool = True,
                      encoding: str = "utf-8",
@@ -281,6 +321,8 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
         key_length (int, optional): Defaults to 2048.
         num_threads (int, optional): thread numbers to use, which is larger or equal to 1. 
                                     Defaults to 1.
+        cipher_type (str, optional): cipher type, options including "OAEP" and "v1.5". 
+                                     Defaults to "OAEP".
         base64_decode (bool, optional): Whether to decode the input ciphertext with base64. 
                                         Defaults to True.
         return_str (bool, optional): return a string if True, otherwise return a bytes.
@@ -295,6 +337,11 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
     assert is_list(cipher_text) or is_bytes(cipher_text), "cipher_text must be a list or bytes"
     assert is_str(private_key) or is_path(private_key) or is_bytes(private_key), \
         "private_key must be a bytes or a path"
+    assert cipher_type in ["OAEP", "v1.5"], "cipher_type must be OAEP or v1.5"
+    if cipher_type == "OAEP":
+        cipher = pkcs1_oaep
+    elif cipher_type == "v1.5":
+        cipher = pkcs1_v1_5
 
     # load private key
     if is_str(private_key) or is_path(private_key):
@@ -313,6 +360,7 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
                                             key, 
                                             return_str, 
                                             key_length, 
+                                            cipher_type,
                                             base64_decode, 
                                             encoding,
                                             sentinel)
@@ -321,6 +369,7 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
                                             key,  
                                             return_str, 
                                             key_length, 
+                                            cipher_type,
                                             base64_decode, 
                                             encoding,
                                             sentinel)
@@ -345,7 +394,10 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
             for c in cipher_text:
                 if base64_decode:
                     c = base64.b64decode(c)
-                sub_plain_text = pkcs1_cipher.new(key).decrypt(c, sentinel)
+                if cipher_type == "OAEP":
+                    sub_plain_text = cipher.new(key).decrypt(c)
+                elif cipher_type == "v1.5":
+                    sub_plain_text = cipher.new(key).decrypt(c, sentinel)
                 if return_str:
                     sub_plain_text = sub_plain_text.decode(encoding)
                 plain_text += sub_plain_text
@@ -364,18 +416,27 @@ def rsa_decrypt_text(cipher_text: Union[List[bytes], bytes],
 
                 while length - offset > 0:
                     if length - offset > chunk_length:
-                        sub_plain_text = pkcs1_cipher.new(key).decrypt(cipher_text[offset:offset+chunk_length], sentinel)
+                        if cipher_type == "OAEP":
+                            sub_plain_text = cipher.new(key).decrypt(cipher_text[offset:offset+chunk_length])
+                        elif cipher_type == "v1.5":
+                            sub_plain_text = cipher.new(key).decrypt(cipher_text[offset:offset+chunk_length], sentinel)
                         if return_str:
                             sub_plain_text = sub_plain_text.decode(encoding)
                         plain_text += sub_plain_text
                     else:
-                        sub_plain_text = pkcs1_cipher.new(key).decrypt(cipher_text[offset:], sentinel)
+                        if cipher_type == "OAEP":
+                            sub_plain_text = cipher.new(key).decrypt(cipher_text[offset:])
+                        elif cipher_type == "v1.5":
+                            sub_plain_text = cipher.new(key).decrypt(cipher_text[offset:], sentinel)
                         if return_str:
                             sub_plain_text = sub_plain_text.decode(encoding)
                         plain_text += sub_plain_text
                     offset += chunk_length
             else:
-                plain_text = pkcs1_cipher.new(key).decrypt(cipher_text, sentinel)
+                if cipher_type == "OAEP":
+                    plain_text = cipher.new(key).decrypt(cipher_text)
+                elif cipher_type == "v1.5":
+                    plain_text = cipher.new(key).decrypt(cipher_text, sentinel)
                 if return_str:
                     plain_text = plain_text.decode(encoding)
         

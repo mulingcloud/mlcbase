@@ -35,7 +35,7 @@ from .logger import Logger
 from .file import listdir, create
 from .emoji_pbar import EmojiProgressBar
 from .register import REMOTE
-from .misc import PlatformNotSupportError
+from .misc import PlatformNotSupportError, path_join
 
 PathLikeType = Union[str, Path]
 
@@ -134,6 +134,7 @@ class SFTP:
                  port: int,
                  user: str,
                  password: str,
+                 remote_platform: str = "linux", 
                  work_dir: Optional[PathLikeType] = None, 
                  logger: Optional[Logger] = None,
                  quiet: bool = False):
@@ -144,14 +145,18 @@ class SFTP:
             port (int)
             user (str)
             password (str)
+            remote_platform (str): Defaults to "linux".
             work_dir (Optional[PathLikeType], optional): will save the log file to "work_dir/log/" if 
                                                          work_dir is specified. Defaults to None.
             logger (Optional[Logger], optional): Defaults to None.
             quiet (bool, optional): whether the logger to run in quiet mode. Defaults to False.
         """
+        if remote_platform not in ["windows", "linux"]:
+            raise PlatformNotSupportError(f"remote platform '{remote_platform}' is not supported")
+        
         self.work_dir = Path(work_dir) if work_dir is not None else None
         self.logger = self._set_logger(logger, quiet)
-        
+        self.remote_platform = remote_platform
         self.support_remote_platform = ["windows", "linux"]
 
         self.__client = self.__connect(host, port, user, password)
@@ -172,15 +177,15 @@ class SFTP:
     def upload_file(self, 
                     local_path: PathLikeType,
                     remote_path: PathLikeType,
-                    remote_platform: str,
+                    remote_platform: Optional[str] = None,
                     callback: Optional[Callable] = None):
         """upload a file to remote server
 
         Args:
             local_path (PathLikeType)
             remote_path (PathLikeType)
-            remote_platform (str)
-            callback (Optional[Callable], optional): callback function. Defaults to None.
+            remote_platform (Optional[str]): Defaults to None.
+            callback (Optional[Callable]): callback function. Defaults to None.
 
         Returns:
             bool: return True if success, otherwise return False
@@ -189,6 +194,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             return False
 
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             return False
@@ -217,14 +223,14 @@ class SFTP:
     def download_file(self,
                       remote_path: PathLikeType,
                       local_path: PathLikeType,
-                      remote_platform: str,
+                      remote_platform: Optional[str] = None,
                       callback: Optional[Callable] = None):
         """download a file from remote server
 
         Args:
             remote_path (PathLikeType)
             local_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
             callback (Optional[Callable], optional): callback function. Defaults to None.
 
         Returns:
@@ -234,6 +240,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             return False
         
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             return False
@@ -262,14 +269,14 @@ class SFTP:
     def upload_dir(self,
                    local_path: PathLikeType,
                    remote_path: PathLikeType,
-                   remote_platform: str,
+                   remote_platform: Optional[str] = None,
                    callback: Optional[Callable] = None):
         """upload a directory to remote server
 
         Args:
             local_path (PathLikeType)
             remote_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
             callback (Optional[Callable], optional): callback function. Defaults to None.
 
         Returns:
@@ -279,6 +286,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             return False
 
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             return False
@@ -321,14 +329,14 @@ class SFTP:
     def download_dir(self,
                      remote_path: PathLikeType,
                      local_path: PathLikeType,
-                     remote_platform: str,
+                     remote_platform: Optional[str] = None,
                      callback: Optional[Callable] = None):
         """download a directory from remote server
 
         Args:
             remote_path (PathLikeType)
             local_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
             callback (Optional[Callable], optional): callback function. Defaults to None.
 
         Returns:
@@ -338,6 +346,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             return False
         
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             return False
@@ -381,12 +390,12 @@ class SFTP:
         
     def remote_exists(self, 
                       remote_path: PathLikeType, 
-                      remote_platform: str):
+                      remote_platform: Optional[str] = None):
         """check if remote path exists
 
         Args:
             remote_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
 
         Raises:
             paramiko.SFTPError: when sftp connection is not established
@@ -399,6 +408,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             raise paramiko.SFTPError('sftp connection is not established')
         
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             raise PlatformNotSupportError('remote platform is not supported')
@@ -413,12 +423,12 @@ class SFTP:
         
     def remote_is_file(self, 
                        remote_path: PathLikeType, 
-                       remote_platform: str):
+                       remote_platform: Optional[str] = None):
         """check if remote path is a file
 
         Args:
             remote_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
 
         Raises:
             paramiko.SFTPError: when sftp connection is not established
@@ -431,6 +441,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             raise paramiko.SFTPError('sftp connection is not established')
 
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             raise PlatformNotSupportError('remote platform is not supported')
@@ -446,12 +457,12 @@ class SFTP:
         
     def remote_is_dir(self, 
                       remote_path: PathLikeType, 
-                      remote_platform: str):
+                      remote_platform: Optional[str] = None):
         """check if remote path is a directory
 
         Args:
             remote_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
 
         Raises:
             paramiko.SFTPError: when sftp connection is not established
@@ -464,6 +475,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             raise paramiko.SFTPError('sftp connection is not established')
         
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             raise PlatformNotSupportError('remote platform is not supported')
@@ -478,13 +490,13 @@ class SFTP:
         
     def remote_mkdir(self, 
                      remote_path: PathLikeType, 
-                     remote_platform: str,
+                     remote_platform: Optional[str] = None,
                      exist_ok: bool = True):
         """make a remote directory
 
         Args:
             remote_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
             exist_ok (bool, optional): if True, the directory will not be created if 
                                        it already exists. Defaults to True.
 
@@ -499,6 +511,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             raise paramiko.SFTPError('sftp connection is not established')
         
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             raise PlatformNotSupportError('remote platform is not supported')
@@ -532,13 +545,13 @@ class SFTP:
     
     def remote_listdir(self,
                        remote_path: PathLikeType, 
-                       remote_platform: str,
+                       remote_platform: Optional[str] = None,
                        return_path: bool = True):
         """list remote directory
 
         Args:
             remote_path (PathLikeType)
-            remote_platform (str)
+            remote_platform (Optional[str]): Defaults to None.
             return_path (bool, optional): return the path of the remote file if True, 
                                           otherwise return the name of the remote file. 
                                           Defaults to True.
@@ -554,6 +567,7 @@ class SFTP:
             self.logger.error('sftp connection is not established')
             raise paramiko.SFTPError('sftp connection is not established')
         
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         if remote_platform not in self.support_remote_platform:
             self.logger.error('remote platform is not supported')
             raise PlatformNotSupportError('remote platform is not supported')
@@ -569,15 +583,16 @@ class SFTP:
             self.logger.error(f'failed to list directory: {str(e)}')
             return None
         
-    def remote_remove(self, remote_path: PathLikeType, remote_platform: str):
+    def remote_remove(self, 
+                      remote_path: PathLikeType, 
+                      remote_platform: Optional[str] = None):
         """remove remote file or directory
 
         Note that for remote directory, it will remove all the contents in the directory
 
         Args:
             remote_path (PathLikeType)
-            remote_platform (str)
-
+            remote_platform (Optional[str]): Defaults to None.
         Raises:
             paramiko.SFTPError: when sftp connection is not established
             PlatformNotSupportError: when remote platform is not supported
@@ -593,6 +608,7 @@ class SFTP:
             self.logger.error('remote platform is not supported')
             raise PlatformNotSupportError('remote platform is not supported')
         
+        remote_platform = self.remote_platform if remote_platform is None else remote_platform
         remote_path = self.__format_path(remote_path, remote_platform)
         if not self.remote_exists(remote_path, remote_platform):
             self.logger.error(f'remote file/directory not exist: {remote_path}')

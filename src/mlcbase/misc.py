@@ -26,6 +26,7 @@ import base64
 import requests
 import socket
 import psutil
+import platform
 from pathlib import Path
 from typing import Optional
 from packaging.version import parse
@@ -256,6 +257,21 @@ def parse_version(version):
         raise ValueError(f'The version {version} identifier is not in the canonical format')
     
     return parse(version)
+
+
+def path_join(*args, os_type: str = "auto"):
+    path_list = []
+    for p in args:
+        if not is_str(p):
+            raise TypeError(f"Path must be a string, but got {type(p)}")
+        p = p.strip()
+        path_list.append(p)
+    
+    os_type = platform.system().lower() if os_type == "auto" else os_type
+    if os_type == "windows":
+        return "\\".join(path_list)
+    else:
+        return "/".join(path_list)
 
 
 class VersionMisMatchError(ValueError):

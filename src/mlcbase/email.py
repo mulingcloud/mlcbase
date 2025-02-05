@@ -28,17 +28,16 @@ from typing import Optional, Union, List
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
+from email.mime.application import MIMEApplication
 from email.header import Header
 from email.utils import formataddr
-from email import encoders
 
 from .logger import Logger
 from .file import get_file_size
 from .conifg import ConfigDict
 from .remote_connect import SFTP
 from .register import EMAIL
-from .misc import is_str, is_dict, FileTooLargeError, FileUploadError
+from .misc import FileTooLargeError, FileUploadError, is_str, is_dict
 
 PathLikeType = Union[str, Path]
 
@@ -219,12 +218,9 @@ class SMTPAPI:
                         html_content += f'<a href="{url}/{Path(p).name}">{Path(p).name}</a><br>'
                 
                 for p in attach2email:
-                    with open(p, "rb") as f:
-                        file_msg = MIMEBase("application", "octet-stream")
-                        file_msg.set_payload(f.read())
-                        encoders.encode_base64(file_msg)
-                        file_msg.add_header("Content-Disposition", f"attachment; filename={Path(p).name}")
-                        message.attach(file_msg)
+                    file_msg = MIMEApplication(open(p, "rb").read())
+                    file_msg.add_header("Content-Disposition", "attachment", filename=Path(p).name)
+                    message.attach(file_msg)
 
             if signature is not None:
                 html_content += 4*"<br>" + signature
