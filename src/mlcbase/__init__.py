@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import io
+from IPython import get_ipython
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+if get_ipython() is None:
+    import sys
+    import io
+
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 from .conifg import ConfigDict, is_config_dict
 from .logger import Logger
@@ -96,7 +99,7 @@ __all__ = [
 ]
 
 
-__version__ = "1.2.7"
+__version__ = "1.2.8"
 TYPE_NAME = "module"
 NAME = "mlcbase"
 DESCRIPTION = "The base module of all MuLingCloud modules and applications."

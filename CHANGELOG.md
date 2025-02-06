@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.8
+
+### Fix Bug
+
+- Fix the bug of importing error when using jupyter notebook.
+
 ## 1.2.7
 
 ### Fix Bug
