@@ -14,3 +14,4 @@ pyotp
 qrcode[pil]
 opencv-python
 matplotlib
+ipython
