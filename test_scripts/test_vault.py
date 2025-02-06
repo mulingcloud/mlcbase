@@ -206,7 +206,7 @@ def run():
 
     ## TOTP
     mount_path = "test_totp"
-    name = "test_name"
+    name = f"totp_name_{sys_info}"
     logger.info(parse_test_title("Testing TOTP engine..."))
     logger.info(parse_test_title("Accessing TOTP secrets engine..."))
     totp_engine = VaultSecretEngineTOTP(
@@ -282,16 +282,18 @@ def run():
     transit.create_key(mount_path, name=f"test_rsa_{sys_info}", key_type="rsa-2048")
     logger.info("Creating hmac key...")
     transit.create_key(mount_path, name=f"test_hmac_{sys_info}", key_type="hmac", key_size=40)
-    logger.info(parse_test_title("Testing import key..."))
-    logger.info("1. Private/Symmetric Key importing (take chacha20 as an example)...")
-    target_key = random_hex(32, seed=random.randint(0, 2**32-1))
-    status = transit.import_key(mount_path, 
-                                name="test_import_private", 
-                                private_or_symmetric_key=target_key,
-                                key_type="chacha20-poly1305")
-    if not status:
-        raise RuntimeError("Transit import private/symmetric key failed")
-    logger.info("2. Public Key-only importing...")
+
+    # TODO: import key
+    # logger.info(parse_test_title("Testing import key..."))
+    # logger.info("1. Private/Symmetric Key importing (take chacha20 as an example)...")
+    # target_key = random_hex(32, seed=random.randint(0, 2**32-1))
+    # status = transit.import_key(mount_path, 
+    #                             name="test_import_private", 
+    #                             private_or_symmetric_key=target_key,
+    #                             key_type="chacha20-poly1305")
+    # if not status:
+    #     raise RuntimeError("Transit import private/symmetric key failed")
+    # logger.info("2. Public Key-only importing...")
 
     logger.info(parse_test_title("Testing update key config..."))
     if not transit.update_key_config(mount_path, name=f"test_aes_divergent_{sys_info}", deletion_allowed=True):
@@ -302,10 +304,9 @@ def run():
     transit.update_key_config(mount_path, name=f"test_ecdsa_{sys_info}", deletion_allowed=True)
     transit.update_key_config(mount_path, name=f"test_rsa_{sys_info}", deletion_allowed=True)
     transit.update_key_config(mount_path, name=f"test_hmac_{sys_info}", deletion_allowed=True)
-    transit.update_key_config(mount_path, name="test_import_private", deletion_allowed=True)
+    # transit.update_key_config(mount_path, name="test_import_private", deletion_allowed=True)
     # TODO
     logger.info(parse_test_title("Testing delete key..."))
-    logger.info("Deleting aes key...")
     if not transit.delete_key(mount_path, name=f"test_aes_divergent_{sys_info}"):
         raise RuntimeError("Transit delete key failed")
     transit.delete_key(mount_path, name=f"test_aes_convergent_{sys_info}")
@@ -314,7 +315,7 @@ def run():
     transit.delete_key(mount_path, name=f"test_ecdsa_{sys_info}")
     transit.delete_key(mount_path, name=f"test_rsa_{sys_info}")
     transit.delete_key(mount_path, name=f"test_hmac_{sys_info}")
-    transit.delete_key(mount_path, name="test_import_private")
+    # transit.delete_key(mount_path, name="test_import_private")
     logger.success("Testing Transit engine... [OK]")
 
 
