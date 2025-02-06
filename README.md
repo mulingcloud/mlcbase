@@ -25,7 +25,7 @@ All tests are conducted by Github workflows. Checking [workflows](https://github
 - MacOS: [![Test mlcbase on MacOS](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-mac.yaml/badge.svg)](https://github.com/mulingcloud/mlcbase/actions/workflows/test-module-mac.yaml)
 
 <details open>
-<summary>Features (v1.2.6)</summary>
+<summary>Features (v1.2.7)</summary>
 
 - **Register**
 

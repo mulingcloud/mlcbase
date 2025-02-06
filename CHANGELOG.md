@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.7
+
+### Fix Bug
+
+- Fix the bug in RSA encryption that would raise error when using the OAEP padding mode.
+
 ## 1.2.6
 
 ### New Feature

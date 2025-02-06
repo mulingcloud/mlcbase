@@ -50,6 +50,7 @@ class _EncryptTextThread(Thread):
         self.key_length = key_length
         self.base64_encode = base64_encode
         self.cipher_text = None
+        self.cipher_type = cipher_type
 
         if cipher_type == "OAEP":
             self.cipher = pkcs1_oaep
@@ -57,7 +58,10 @@ class _EncryptTextThread(Thread):
             self.cipher = pkcs1_v1_5
 
     def run(self):
-        default_length = self.key_length // 8 - 11
+        if self.cipher_type == "OAEP":
+            default_length = self.key_length // 8 - 42
+        elif self.cipher_type == "v1.5":
+            default_length = self.key_length // 8 - 11
         if len(self.plain_text) <= default_length:
             cipher_text = self.cipher.new(self.public_key).encrypt(self.plain_text)
             if self.base64_encode:
@@ -279,7 +283,10 @@ def rsa_encrypt_text(plain_text: Union[str, bytes],
             if is_bytes(thread.cipher_text):
                 cipher_text.append(thread.cipher_text)
     else:
-        default_length = key_length // 8 - 11
+        if cipher_type == "OAEP":
+            default_length = key_length // 8 - 42
+        elif cipher_type == "v1.5":
+            default_length = key_length // 8 - 11
         if len(plain_text) <= default_length:
             cipher_text = cipher.new(key).encrypt(plain_text)
             if base64_encode:
@@ -555,6 +562,7 @@ def rsa_encrypt_file(plain_file_path: PathLikeType,
                      key_length: int = 2048,
                      num_process: int = 1,
                      num_threads: int = 1,
+                     cipher_type: str = "OAEP",
                      encoding: str = "utf-8",
                      logger: Optional[Logger] = None):
     """encrypt file with rsa public key
@@ -566,6 +574,8 @@ def rsa_encrypt_file(plain_file_path: PathLikeType,
         key_length (int, optional): Defaults to 2048.
         num_process (int, optional): number of processes. Defaults to 1.
         num_threads (int, optional): number of threads. Defaults to 1.
+        cipher_type (str, optional): cipher type, options including "OAEP" and "v1.5". 
+                                     Defaults to "OAEP".
         encoding (str, optional): Defaults to "utf-8".
         logger (Optional[Logger], optional): Defaults to None.
 
@@ -604,7 +614,7 @@ def rsa_encrypt_file(plain_file_path: PathLikeType,
             for i in range(num_process):
                 with open(str(plain_file_path)+f".chunk.{i}", "rb") as f_chunk:
                     chunk = f_chunk.read()
-                    cihper = pool.apply_async(rsa_encrypt_text, args=(chunk, public_key, key_length, num_threads, False, encoding,))
+                    cihper = pool.apply_async(rsa_encrypt_text, args=(chunk, public_key, key_length, num_threads, cipher_type, False, encoding,))
                     cipher_list.append(cihper)
                 Path(str(plain_file_path)+f".chunk.{i}").unlink()
             pool.close()
@@ -612,7 +622,7 @@ def rsa_encrypt_file(plain_file_path: PathLikeType,
         else:
             with open(plain_file_path, "rb") as f_chunk:
                 chunk = f_chunk.read()
-                cipher_list = rsa_encrypt_text(chunk, public_key, key_length, num_threads, False, encoding)
+                cipher_list = rsa_encrypt_text(chunk, public_key, key_length, num_threads, cipher_type, False, encoding)
                 if is_bytes(cipher_list):
                     cipher_list = [cipher_list]
         
@@ -644,6 +654,7 @@ def rsa_decrypt_file(crypto_file_path: PathLikeType,
                      key_length: int = 2048,
                      num_process: int = 1,
                      num_threads: int = 1,
+                     cipher_type: str = "OAEP",
                      encoding: str = "utf-8",
                      sentinel: Any = 0,
                      logger: Optional[Logger] = None):
@@ -656,6 +667,8 @@ def rsa_decrypt_file(crypto_file_path: PathLikeType,
         key_length (int, optional): Defaults to 2048.
         num_process (int, optional): number of processes. Defaults to 1.
         num_threads (int, optional): number of threads. Defaults to 1.
+        cipher_type (str, optional): cipher type, options including "OAEP" and "v1.5". 
+                                     Defaults to "OAEP".
         encoding (str, optional): Defaults to "utf-8".
         sentinel (Any, optional): sentinel value for RSA decryption. Defaults to 0.
         logger (Optional[Logger], optional): Defaults to None.
@@ -694,7 +707,7 @@ def rsa_decrypt_file(crypto_file_path: PathLikeType,
             for i in range(num_process):
                 with open(str(crypto_file_path)+f".chunk.{i}", "rb") as f_chunk:
                     chunk = f_chunk.read()
-                    plain = pool.apply_async(rsa_decrypt_text, args=(chunk, private_key, key_length, num_threads, False, False, encoding, sentinel,))
+                    plain = pool.apply_async(rsa_decrypt_text, args=(chunk, private_key, key_length, num_threads, cipher_type, False, False, encoding, sentinel,))
                     plain_list.append(plain)
                 Path(str(crypto_file_path)+f".chunk.{i}").unlink()
             pool.close()
@@ -702,7 +715,7 @@ def rsa_decrypt_file(crypto_file_path: PathLikeType,
         else:
             with open(crypto_file_path, 'rb') as f_chunk:
                 chunk = f_chunk.read()
-                plain_list = [rsa_decrypt_text(chunk, private_key, key_length, num_threads, False, False, encoding, sentinel)]
+                plain_list = [rsa_decrypt_text(chunk, private_key, key_length, num_threads, cipher_type, False, False, encoding, sentinel)]
         
         # save
         with open(plain_save_path, "wb") as f_save:
