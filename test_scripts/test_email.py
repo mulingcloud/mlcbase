@@ -48,10 +48,10 @@ def run():
                         <span style="font-weight: bold;">Office Time:</span> Asia/Shanghai, 9:00-18:00, Mon.-Fri.
                 </div>"""
 
-    if isinstance(args.python_version, list):
-        python_version = f"{args.python_version[0]}-{args.python_version[-1]}"
+    if len(args.python_version) == 1:
+        python_version = args.python_version[0]
     else:
-        python_version = args.python_version
+        python_version = f"{args.python_version[0]}-{args.python_version[-1]}"
 
     logger.info("SMTP with SSL")
     if args.job_status == "success":
