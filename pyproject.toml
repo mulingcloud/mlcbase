@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlcbase"
-version = "1.2.8"
+version = "1.2.9"
 authors = [
     {name = "Weiming Chen", email = "wmchen@mulingcloud.com"},
     {name = "Yuanshuang Sun", email = "sunsun5544@126.com"}

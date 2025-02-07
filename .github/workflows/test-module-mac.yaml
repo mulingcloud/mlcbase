@@ -1,17 +1,14 @@
 name: Test mlcbase on MacOS
 on: [push]
 jobs:
-  main_job:
+  job_py38:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.8
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.8"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -19,7 +16,7 @@ jobs:
       - name: Test ConfigDict
         run: python test_scripts/test_config.py
       - name: Test Database
-        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version "3.8"
       - name: Test Emoji Progress Bar
         run: python test_scripts/test_progress_bar.py
       - name: Test Encryption and Decryption
@@ -33,14 +30,49 @@ jobs:
       - name: Test OTP
         run: python test_scripts/test_otp.py
       - name: Test Remote Connect
-        run: python test_scripts/test_remote_connect.py --host ${{ secrets.SERVER_HOST }} --port ${{ secrets.SERVER_PORT }} --user ${{ secrets.SERVER_USER }} --password ${{ secrets.SERVER_PASSWORD }} --root_path ${{ secrets.SERVER_ROOT }} --python_version ${{ matrix.python-version }}
+        run: python test_scripts/test_remote_connect.py --host ${{ secrets.SERVER_HOST }} --port ${{ secrets.SERVER_PORT }} --user ${{ secrets.SERVER_USER }} --password ${{ secrets.SERVER_PASSWORD }} --root_path ${{ secrets.SERVER_ROOT }} --python_version "3.8"
       - name: Test HashiCorp Vault
-        run: python test_scripts/test_vault.py --host ${{ secrets.VAULT_HOST }} --user ${{ secrets.VAULT_USERNAME }} --password ${{ secrets.VAULT_PASSWORD }} --python_version ${{ matrix.python-version }}
-
-  send_success_email:
+        run: python test_scripts/test_vault.py --host ${{ secrets.VAULT_HOST }} --user ${{ secrets.VAULT_USERNAME }} --password ${{ secrets.VAULT_PASSWORD }} --python_version "3.8"
+  
+  job_py39:
     runs-on: macos-latest
-    if: ${{ success() }}
-    needs: main_job
+    if: ${{ always() }}
+    needs: job_py38
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Test ConfigDict
+        run: python test_scripts/test_config.py
+      - name: Test Database
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version "3.9"
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
+      - name: Test Encryption and Decryption
+        run: python test_scripts/test_encrypt.py
+      - name: Test File Operations
+        run: python test_scripts/test_file.py
+      - name: Test Image IO
+        run: python test_scripts/test_image_io.py
+      - name: Test Loading
+        run: python test_scripts/test_loading.py
+      - name: Test OTP
+        run: python test_scripts/test_otp.py
+      - name: Test Remote Connect
+        run: python test_scripts/test_remote_connect.py --host ${{ secrets.SERVER_HOST }} --port ${{ secrets.SERVER_PORT }} --user ${{ secrets.SERVER_USER }} --password ${{ secrets.SERVER_PASSWORD }} --root_path ${{ secrets.SERVER_ROOT }} --python_version "3.9"
+      - name: Test HashiCorp Vault
+        run: python test_scripts/test_vault.py --host ${{ secrets.VAULT_HOST }} --user ${{ secrets.VAULT_USERNAME }} --password ${{ secrets.VAULT_PASSWORD }} --python_version "3.9"
+
+  job_py310:
+    runs-on: macos-latest
+    if: ${{ always() }}
+    needs: job_py39
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.10
@@ -51,13 +83,170 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Send email
-        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status success
+      - name: Test ConfigDict
+        run: python test_scripts/test_config.py
+      - name: Test Database
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version "3.10"
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
+      - name: Test Encryption and Decryption
+        run: python test_scripts/test_encrypt.py
+      - name: Test File Operations
+        run: python test_scripts/test_file.py
+      - name: Test Image IO
+        run: python test_scripts/test_image_io.py
+      - name: Test Loading
+        run: python test_scripts/test_loading.py
+      - name: Test OTP
+        run: python test_scripts/test_otp.py
+      - name: Test Remote Connect
+        run: python test_scripts/test_remote_connect.py --host ${{ secrets.SERVER_HOST }} --port ${{ secrets.SERVER_PORT }} --user ${{ secrets.SERVER_USER }} --password ${{ secrets.SERVER_PASSWORD }} --root_path ${{ secrets.SERVER_ROOT }} --python_version "3.10"
+      - name: Test HashiCorp Vault
+        run: python test_scripts/test_vault.py --host ${{ secrets.VAULT_HOST }} --user ${{ secrets.VAULT_USERNAME }} --password ${{ secrets.VAULT_PASSWORD }} --python_version "3.10"
+
+  job_py311:
+    runs-on: macos-latest
+    if: ${{ always() }}
+    needs: job_py310
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Test ConfigDict
+        run: python test_scripts/test_config.py
+      - name: Test Database
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version "3.11"
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
+      - name: Test Encryption and Decryption
+        run: python test_scripts/test_encrypt.py
+      - name: Test File Operations
+        run: python test_scripts/test_file.py
+      - name: Test Image IO
+        run: python test_scripts/test_image_io.py
+      - name: Test Loading
+        run: python test_scripts/test_loading.py
+      - name: Test OTP
+        run: python test_scripts/test_otp.py
+      - name: Test Remote Connect
+        run: python test_scripts/test_remote_connect.py --host ${{ secrets.SERVER_HOST }} --port ${{ secrets.SERVER_PORT }} --user ${{ secrets.SERVER_USER }} --password ${{ secrets.SERVER_PASSWORD }} --root_path ${{ secrets.SERVER_ROOT }} --python_version "3.11"
+      - name: Test HashiCorp Vault
+        run: python test_scripts/test_vault.py --host ${{ secrets.VAULT_HOST }} --user ${{ secrets.VAULT_USERNAME }} --password ${{ secrets.VAULT_PASSWORD }} --python_version "3.11"
   
-  send_fail_email:
+  job_py312:
+    runs-on: macos-latest
+    if: ${{ always() }}
+    needs: job_py311
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Test ConfigDict
+        run: python test_scripts/test_config.py
+      - name: Test Database
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version "3.12"
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
+      - name: Test Encryption and Decryption
+        run: python test_scripts/test_encrypt.py
+      - name: Test File Operations
+        run: python test_scripts/test_file.py
+      - name: Test Image IO
+        run: python test_scripts/test_image_io.py
+      - name: Test Loading
+        run: python test_scripts/test_loading.py
+      - name: Test OTP
+        run: python test_scripts/test_otp.py
+      - name: Test Remote Connect
+        run: python test_scripts/test_remote_connect.py --host ${{ secrets.SERVER_HOST }} --port ${{ secrets.SERVER_PORT }} --user ${{ secrets.SERVER_USER }} --password ${{ secrets.SERVER_PASSWORD }} --root_path ${{ secrets.SERVER_ROOT }} --python_version "3.12"
+      - name: Test HashiCorp Vault
+        run: python test_scripts/test_vault.py --host ${{ secrets.VAULT_HOST }} --user ${{ secrets.VAULT_USERNAME }} --password ${{ secrets.VAULT_PASSWORD }} --python_version "3.12"
+  
+  job_py313:
+    runs-on: macos-latest
+    if: ${{ always() }}
+    needs: job_py312
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Test ConfigDict
+        run: python test_scripts/test_config.py
+      - name: Test Database
+        run: python test_scripts/test_database.py --host ${{ secrets.DB_HOST }} --port ${{ secrets.DB_PORT }} --user ${{ secrets.DB_USERNAME }} --password ${{ secrets.DB_PASSWORD }} --database ${{ secrets.DB_NAME }} --python_version "3.13"
+      - name: Test Emoji Progress Bar
+        run: python test_scripts/test_progress_bar.py
+      - name: Test Encryption and Decryption
+        run: python test_scripts/test_encrypt.py
+      - name: Test File Operations
+        run: python test_scripts/test_file.py
+      - name: Test Image IO
+        run: python test_scripts/test_image_io.py
+      - name: Test Loading
+        run: python test_scripts/test_loading.py
+      - name: Test OTP
+        run: python test_scripts/test_otp.py
+      - name: Test Remote Connect
+        run: python test_scripts/test_remote_connect.py --host ${{ secrets.SERVER_HOST }} --port ${{ secrets.SERVER_PORT }} --user ${{ secrets.SERVER_USER }} --password ${{ secrets.SERVER_PASSWORD }} --root_path ${{ secrets.SERVER_ROOT }} --python_version "3.13"
+      - name: Test HashiCorp Vault
+        run: python test_scripts/test_vault.py --host ${{ secrets.VAULT_HOST }} --user ${{ secrets.VAULT_USERNAME }} --password ${{ secrets.VAULT_PASSWORD }} --python_version "3.13"
+
+  job_py38_failed:
     runs-on: macos-latest
     if: ${{ failure() }}
-    needs: main_job
+    needs: job_py38
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Send email
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status fail --python_version "3.8"
+  
+  job_py39_failed:
+    runs-on: macos-latest
+    if: ${{ failure() }}
+    needs: job_py39
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Send email
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status fail --python_version "3.9"
+  
+  job_py310_failed:
+    runs-on: macos-latest
+    if: ${{ failure() }}
+    needs: job_py310
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.10
@@ -69,4 +258,72 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Send email
-        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status fail
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status fail --python_version "3.10"
+
+  job_py311_failed:
+    runs-on: macos-latest
+    if: ${{ failure() }}
+    needs: job_py311
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Send email
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status fail --python_version "3.11"
+  
+  job_py312_failed:
+    runs-on: macos-latest
+    if: ${{ failure() }}
+    needs: job_py312
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Send email
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status fail --python_version "3.12"
+  
+  job_py313_failed:
+    runs-on: macos-latest
+    if: ${{ failure() }}
+    needs: job_py313
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Send email
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status fail --python_version "3.13"
+  
+  all_job_success:
+    runs-on: macos-latest
+    if: ${{ success() }}
+    needs: [job_py38, job_py39, job_py310, job_py311, job_py312, job_py313]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Send email
+        run: python test_scripts/test_email.py --host ${{ secrets.EMAIL_HOST }} --port ${{ secrets.EMAIL_PORT }} --port_wo_ssl ${{ secrets.EMAIL_PORT_WO_SSL }} --name ${{ secrets.EMAIL_NAME }} --address ${{ secrets.EMAIL_ADDRESS }} --password ${{ secrets.EMAIL_PASSWORD }} --receiver_name "${{ secrets.EMAIL_REC_NAME }}" --receiver_email ${{ secrets.EMAIL_REC_ADDRESS }} --job_status success --python_version "3.8" "3.9" "3.10" "3.11" "3.12" "3.13"

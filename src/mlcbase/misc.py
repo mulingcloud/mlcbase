@@ -264,7 +264,7 @@ def path_join(*args, os_type: str = "auto"):
     for p in args:
         if not is_str(p):
             raise TypeError(f"Path must be a string, but got {type(p)}")
-        p = p.strip()
+        p = p.strip().strip("/").strip("\\")
         path_list.append(p)
     
     os_type = platform.system().lower() if os_type == "auto" else os_type
