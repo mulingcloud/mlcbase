@@ -99,7 +99,7 @@ __all__ = [
 ]
 
 
-__version__ = "1.2.9"
+__version__ = "1.2.10"
 TYPE_NAME = "module"
 NAME = "mlcbase"
 DESCRIPTION = "The base module of all MuLingCloud modules and applications."

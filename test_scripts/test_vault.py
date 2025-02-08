@@ -36,11 +36,11 @@ def run():
     logger.init_logger()
 
     py_version = "".join(args.python_version.split("."))
-    sys_info = f"{platform.system()}_{py_version}"
+    sys_info = f"{platform.system().lower()}_{py_version}"
 
     ## KV v1
     mount_path = "test_kv1"
-    path = f"test_path_{sys_info}"
+    path = f"{sys_info}_{random_hex(6, uppercase=False)}"
     logger.info(parse_test_title("Testing KV v1 engine..."))
     logger.info(parse_test_title("Accessing KV v1 secrets engine..."))
     kv1_engine = VaultSecretEngineKV1(
@@ -77,7 +77,7 @@ def run():
 
     ## KV v2
     mount_path = "test_kv2"
-    path = f"test_path_{sys_info}"
+    path = f"{sys_info}_{random_hex(6, uppercase=False)}"
     logger.info(parse_test_title("Testing KV v2 engine..."))
     logger.info(parse_test_title("Accessing KV v2 secrets engine..."))
     kv2_engine = VaultSecretEngineKV2(
@@ -164,7 +164,7 @@ def run():
     logger.success("Testing KV v2 engine... [OK]")
 
     ## Cubbyhole
-    path = f"test_path_{sys_info}"
+    path = f"{sys_info}__{random_hex(6, uppercase=False)}"
     logger.info(parse_test_title("Testing Cubbyhole engine..."))
     logger.info(parse_test_title("Accessing Cubbyhole secrets engine..."))
     cubbyhole = VaultSecretEngineCubbyhole(
@@ -205,7 +205,7 @@ def run():
 
     ## TOTP
     mount_path = "test_totp"
-    name = f"totp_name_{sys_info}"
+    name = f"{sys_info}__{random_hex(6, uppercase=False)}"
     logger.info(parse_test_title("Testing TOTP engine..."))
     logger.info(parse_test_title("Accessing TOTP secrets engine..."))
     totp_engine = VaultSecretEngineTOTP(

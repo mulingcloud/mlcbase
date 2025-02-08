@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.10
+
+### Fix Bug
+
+- Fix the bug in `path_join()`.
+
 ## 1.2.9
 
 ### Fix Bug

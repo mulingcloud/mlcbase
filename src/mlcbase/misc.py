@@ -261,10 +261,16 @@ def parse_version(version):
 
 def path_join(*args, os_type: str = "auto"):
     path_list = []
-    for p in args:
+    for i, p in enumerate(args):
         if not is_str(p):
             raise TypeError(f"Path must be a string, but got {type(p)}")
-        p = p.strip().strip("/").strip("\\")
+        
+        p = p.strip()
+        if i == 0:
+            if p.endswith("/") or p.endswith("\\"):
+                p = p[:-1]
+        else:
+            p = p.strip("/").strip("\\")
         path_list.append(p)
     
     os_type = platform.system().lower() if os_type == "auto" else os_type
