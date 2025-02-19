@@ -23,13 +23,15 @@ import ipaddress
 import warnings
 import random
 import base64
-import requests
 import socket
-import psutil
 import platform
 from pathlib import Path
 from typing import Optional
+
+import requests
+import psutil
 from packaging.version import parse
+
 from .conifg import ConfigDict
 from .logger import Logger
 

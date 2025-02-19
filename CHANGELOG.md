@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.11
+
+### New Feature
+
+- Support `stdin` for SSH connection.
+
 ## 1.2.10
 
 ### Fix Bug

@@ -84,6 +84,7 @@ class SSH:
     def execute(self, 
                 command: str, 
                 return_str: bool = True,
+                input_std: Optional[str] = None,
                 encoding: str = "utf-8") -> str:
         """execute command on remote server
 
@@ -99,7 +100,11 @@ class SSH:
             self.logger.error('ssh connection is not established.')
             return None
         
-        _, stdout, stderr = self.__ssh_client.exec_command(command)
+        stdin, stdout, stderr = self.__ssh_client.exec_command(command)
+
+        if input_std is not None:
+            stdin.write(input_std)
+            stdin.flush()
 
         if return_str:
             stdout = stdout.read().decode(encoding)
